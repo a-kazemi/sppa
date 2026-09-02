@@ -1,0 +1,56 @@
+{
+  "name": "sp-permission-analyzer",
+  "version": "0.1.0",
+  "description": "Explain and audit SharePoint Server on-premises permissions from the command line. Read-only, no data egress, no telemetry.",
+  "bin": {
+    "spperm": "dist/src/index.js"
+  },
+  "main": "dist/src/index.js",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist/src",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "docs"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test \"dist/test/*.test.js\"",
+    "test:only": "node --test \"dist/test/*.test.js\"",
+    "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "keywords": [
+    "sharepoint",
+    "sharepoint-server",
+    "sharepoint-on-premises",
+    "sharepoint-2016",
+    "sharepoint-2019",
+    "subscription-edition",
+    "permissions",
+    "permission-audit",
+    "security",
+    "governance",
+    "access-review",
+    "ntlm",
+    "cli"
+  ],
+  "author": "Auto Company",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/auto-company/sp-permission-analyzer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/auto-company/sp-permission-analyzer/issues"
+  },
+  "homepage": "https://github.com/auto-company/sp-permission-analyzer#readme",
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "typescript": "^5.6.0"
+  }
+}

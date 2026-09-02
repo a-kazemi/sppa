@@ -1,0 +1,84 @@
+# Authentication
+
+## What v0.1.0 supports
+
+**NTLM with explicit credentials, over HTTP or HTTPS.** That is the whole
+surface. The handshake is implemented in `src/auth/` and does not depend on any
+third-party NTLM/SharePoint auth library.
+
+The client:
+
+1. Sends the request and, on `401` with `WWW-Authenticate: NTLM`, begins the
+   handshake.
+2. Sends a Type 1 (NEGOTIATE) message.
+3. Parses the Type 2 (CHALLENGE) message, including the TargetInfo block.
+4. Sends a Type 3 (AUTHENTICATE) message with an **NTLMv2** response and an
+   LMv2 response.
+
+All four legs travel over a single pinned keep-alive socket, because NTLM
+authenticates the TCP connection rather than the individual request.
+
+## Supplying credentials
+
+Preferred — environment variables (not visible in the process list):
+
+```bash
+export SPPERM_USERNAME='CONTOSO\svc_audit'   # DOMAIN\user, or plain user + --domain
+export SPPERM_PASSWORD='...'
+export SPPERM_DOMAIN='CONTOSO'               # optional if DOMAIN\user is used
+```
+
+Fallback — flags (`--username`, `--password`, `--domain`). Using `--password`
+prints a warning; avoid it on shared hosts.
+
+The domain is resolved in this order: `--domain` → `SPPERM_DOMAIN` → the
+`DOMAIN\` prefix of the username → empty.
+
+## Which account to use
+
+A **dedicated read-only service account** is recommended:
+
+- It needs at least *Read* on the site collection you point it at.
+- For `scan-site` item-level results it needs to be able to see items with unique
+  permissions; anything it cannot see is silently skipped (no error).
+- It never needs write access. The tool only issues `GET` requests.
+
+## Not supported (open an issue if you need it)
+
+| Mechanism | Status |
+|-----------|--------|
+| AD FS / WS-Federation (`WWW-Authenticate: Negotiate` to an STS, `FedAuth` cookie) | Not implemented. The tool detects it and prints guidance. |
+| Forms-Based Auth (FBA) | Not implemented. |
+| Kerberos-only endpoints (`Negotiate` without NTLM fallback) | Not implemented — no pure-JS Kerberos. Enable NTLM fallback on the web application, or open an issue. |
+| Client-certificate auth | Not implemented. |
+| MFA on the sign-in path | Not supported. |
+
+These are deliberately out of scope for the first release. AD FS and FBA are
+much larger handshakes with per-environment variation; they will only be added
+if real users ask for them.
+
+## TLS
+
+Internal farms frequently use a private CA or a self-signed certificate. If
+certificate verification fails you will get a clear error naming the cause. To
+bypass verification (understand the risk — you lose protection against a
+man-in-the-middle):
+
+```bash
+spperm scan-site --site https://sharepoint/sites/hr --insecure
+```
+
+A cleaner alternative is to trust your internal CA for Node:
+
+```bash
+export NODE_EXTRA_CA_CERTS=/path/to/internal-root-ca.pem
+```
+
+## Troubleshooting
+
+| Symptom | Likely cause |
+|---------|--------------|
+| `error: NTLM authentication was rejected (401 after handshake).` | Wrong username / password / domain, or the account is locked out. |
+| `Server offered "Negotiate" but not NTLM.` | The web application uses Kerberos-only or AD FS. See the table above. |
+| `SharePoint returned a non-JSON response` | The URL redirected to a sign-in page — usually AD FS/FBA, or the wrong `--site`. |
+| `Network error (DEPTH_ZERO_SELF_SIGNED_CERT)` | Self-signed TLS cert. Use `NODE_EXTRA_CA_CERTS` or `--insecure`. |

@@ -1,0 +1,159 @@
+# sp-permission-analyzer
+
+Explain and audit **SharePoint Server on-premises** permissions from the command
+line. Built for SharePoint Server 2016, 2019 and Subscription Edition farms.
+
+- **`explain-access`** — answer "why does this user have access to this site?"
+  in one command: direct grants, SharePoint group membership, broad-audience
+  claims ("Everyone"), AD security groups, and exactly where inheritance breaks.
+- **`scan-site`** — audit one site collection for broken permission inheritance,
+  orphaned SIDs (deleted AD accounts still on ACLs), broad-audience grants,
+  oversized SharePoint groups, and site collection administrators.
+
+**Read-only. No data leaves your machine. No telemetry. No account required.**
+The tool only issues `GET` requests to the SharePoint REST API (`_api`).
+
+> Status: `v0.1.0`, early release. It does one job on classic NTLM farms. If it
+> is useful — or if it breaks in your environment — please
+> [open an issue](https://github.com/auto-company/sp-permission-analyzer/issues).
+
+---
+
+## Install
+
+Requires **Node.js 18 or newer**.
+
+```bash
+npm install -g sp-permission-analyzer
+```
+
+Or run without installing:
+
+```bash
+npx sp-permission-analyzer --help
+```
+
+## Authentication
+
+v0.1.0 supports **NTLM with explicit credentials only** (see [docs/AUTH.md](docs/AUTH.md)).
+Provide the auditing account through environment variables — never on the command
+line, where it would show up in the process list:
+
+```bash
+export SPPERM_USERNAME='CONTOSO\svc_audit'
+export SPPERM_PASSWORD='...'
+# optional; also parsed from DOMAIN\user above
+export SPPERM_DOMAIN='CONTOSO'
+```
+
+A read-only account works for everything except item-level scanning inside lists
+where it lacks access — those items are simply skipped.
+
+## Usage
+
+### Explain why a user has access
+
+```bash
+spperm explain-access --site https://sharepoint/sites/hr --user 'CONTOSO\jdoe'
+```
+
+```
+SharePoint access explanation
+Site: https://sharepoint/sites/hr
+User: Jane Doe (User, id 14)
+Login: i:0#.w|contoso\jdoe
+
+Verdict: HAS ACCESS
+
+Effective permissions on this scope:
+  • Open the site
+  • View pages
+  • View list items / documents
+  • Edit list items
+
+Inheritance is broken at:
+  • list: Salary Review
+
+How access is granted:
+  ✓ SharePoint group "HR Site Members" — Contribute @ list "Salary Review"
+
+Notes:
+  • 1 AD security group(s) on this scope could not be expanded via REST.
+    The effective-permission check above is still authoritative.
+```
+
+Scope it to a single list, or handle classic Windows-claims logins:
+
+```bash
+spperm explain-access --site https://sharepoint/sites/hr \
+  --user 'CONTOSO\jdoe' --list 'Salary Review' --windows-claims
+```
+
+### Audit a site collection
+
+```bash
+spperm scan-site --site https://sharepoint/sites/hr
+spperm scan-site --site https://sharepoint/sites/hr --format json > hr-audit.json
+```
+
+`scan-site` walks the web, every visible list, and (unless `--skip-items`) list
+items with unique permissions. Use `--max-items` to bound very large libraries
+and `--large-group-threshold` to tune the oversized-group flag.
+
+## JSON output
+
+Both commands accept `--format json` and emit a stable envelope
+(`schemaVersion: 1`) suitable for diffing between runs or feeding into a report:
+
+```json
+{
+  "tool": "sp-permission-analyzer",
+  "schemaVersion": 1,
+  "command": "scan-site",
+  "generatedAt": "2026-09-03T12:00:00.000Z",
+  "site": "https://sharepoint/sites/hr",
+  "result": { "summary": { "...": "..." }, "brokenInheritance": [] }
+}
+```
+
+## What it does **not** do (yet)
+
+- No AD FS / WS-Federation or Forms-Based Auth (NTLM only).
+- No Kerberos-only endpoints.
+- No AD security-group expansion — SharePoint REST does not expose it. The tool
+  reports which AD groups are on each ACL and relies on
+  `getUserEffectivePermissions` (which resolves them server-side) for the verdict.
+- No writes, ever. It will not fix anything it finds.
+- No multi-farm, scheduled snapshots, or drift diffing.
+
+## Exit codes
+
+| Code | Meaning |
+|-----:|---------|
+| 0 | Success |
+| 2 | Usage error (bad flags / missing arguments) |
+| 3 | Authentication failed |
+| 4 | SharePoint reachable but the request failed |
+| 5 | Network / TLS / DNS failure |
+
+## Security
+
+See [docs/SECURITY.md](docs/SECURITY.md). Short version: read-only, single farm,
+no outbound connections other than to the `--site` you pass, credentials read
+from the environment and never logged.
+
+## Development
+
+```bash
+npm install
+npm run build
+npm test          # builds, then runs the node:test suite
+```
+
+The permission-analysis logic (`src/analysis/`) and the NTLM handshake
+(`src/auth/`) are pure functions unit-tested against recorded REST fixtures and
+the [MS-NLMP] test vectors — no live farm needed to hack on them.
+
+## License
+
+MIT © Auto Company

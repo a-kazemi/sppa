@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths: ['projects/sp-permission-analyzer/**', '.github/workflows/ci.yml']
+  pull_request:
+    paths: ['projects/sp-permission-analyzer/**', '.github/workflows/ci.yml']
+
+defaults:
+  run:
+    working-directory: projects/sp-permission-analyzer
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ['18', '20', '22']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm ci
+      - run: npm run build
+      - run: npm run test:only
+      - name: CLI smoke test
+        run: |
+          node dist/src/index.js --version
+          node dist/src/index.js --help > /dev/null
