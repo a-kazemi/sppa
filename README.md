@@ -1,5 +1,8 @@
 # sp-permission-analyzer
 
+[![CI](https://github.com/a-kazemi/sp-permission-analyzer/actions/workflows/ci.yml/badge.svg)](https://github.com/a-kazemi/sp-permission-analyzer/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 Explain and audit **SharePoint Server on-premises** permissions from the command
 line. Built for SharePoint Server 2016, 2019 and Subscription Edition farms.
 
@@ -15,22 +18,27 @@ The tool only issues `GET` requests to the SharePoint REST API (`_api`).
 
 > Status: `v0.1.0`, early release. It does one job on classic NTLM farms. If it
 > is useful — or if it breaks in your environment — please
-> [open an issue](https://github.com/auto-company/sp-permission-analyzer/issues).
+> [open an issue](https://github.com/a-kazemi/sp-permission-analyzer/issues).
 
 ---
 
 ## Install
 
-Requires **Node.js 18 or newer**.
+Requires **Node.js 18 or newer**. Not on npm yet — install from source:
 
 ```bash
-npm install -g sp-permission-analyzer
+git clone https://github.com/a-kazemi/sp-permission-analyzer.git
+cd sp-permission-analyzer
+npm install && npm run build
+npm link            # puts `spperm` on your PATH
+
+spperm --help
 ```
 
-Or run without installing:
+Or install straight from GitHub:
 
 ```bash
-npx sp-permission-analyzer --help
+npm install -g github:a-kazemi/sp-permission-analyzer
 ```
 
 ## Authentication
@@ -141,6 +149,19 @@ Both commands accept `--format json` and emit a stable envelope
 See [docs/SECURITY.md](docs/SECURITY.md). Short version: read-only, single farm,
 no outbound connections other than to the `--site` you pass, credentials read
 from the environment and never logged.
+
+## Feedback wanted — and a free permission audit
+
+This is an early release and the fastest way to make it better is to hear from
+people running real farms.
+
+- **Hit a bug or an auth failure?** [Open an issue](https://github.com/a-kazemi/sp-permission-analyzer/issues)
+  with your SharePoint version and the (redacted) error — auth-handshake reports
+  are especially valuable right now.
+- **Have a messy permission situation you'd like a second pair of eyes on?**
+  Open an issue describing it (no data required) and we'll help you read the
+  `explain-access` / `scan-site` output and figure out what to fix — free, no
+  strings. We're doing this to learn which problems matter most.
 
 ## Development
 

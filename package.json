@@ -19,6 +19,7 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "prepare": "npm run build",
     "test": "npm run build && node --test \"dist/test/*.test.js\"",
     "test:only": "node --test \"dist/test/*.test.js\"",
     "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
@@ -43,12 +44,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/auto-company/sp-permission-analyzer.git"
+    "url": "https://github.com/a-kazemi/sp-permission-analyzer.git"
   },
   "bugs": {
-    "url": "https://github.com/auto-company/sp-permission-analyzer/issues"
+    "url": "https://github.com/a-kazemi/sp-permission-analyzer/issues"
   },
-  "homepage": "https://github.com/auto-company/sp-permission-analyzer#readme",
+  "homepage": "https://github.com/a-kazemi/sp-permission-analyzer#readme",
   "devDependencies": {
     "@types/node": "^20.14.0",
     "typescript": "^5.6.0"
