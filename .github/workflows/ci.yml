@@ -3,13 +3,7 @@ name: CI
 on:
   push:
     branches: [main]
-    paths: ['projects/sp-permission-analyzer/**', '.github/workflows/ci.yml']
   pull_request:
-    paths: ['projects/sp-permission-analyzer/**', '.github/workflows/ci.yml']
-
-defaults:
-  run:
-    working-directory: projects/sp-permission-analyzer
 
 jobs:
   test:
