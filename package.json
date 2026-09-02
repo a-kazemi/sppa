@@ -20,8 +20,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "prepare": "npm run build",
-    "test": "npm run build && node --test \"dist/test/*.test.js\"",
-    "test:only": "node --test \"dist/test/*.test.js\"",
+    "test": "npm run build && node --test dist/test/*.test.js",
+    "test:only": "node --test dist/test/*.test.js",
     "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
     "prepublishOnly": "npm run clean && npm run build"
   },
