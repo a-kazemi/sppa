@@ -8,6 +8,14 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- `docs/TROUBLESHOOTING.md` — every `error:` string the CLI can print, with its
+  cause and fix, written to be pasted straight into an issue-tracker reply. Also
+  covers conditions that surface as a generic error: clock skew, channel binding
+  / Extended Protection for Authentication, `_api` disabled by policy, reverse
+  proxies, and multi-WFE affinity. `test/errors.test.ts` pins the exit-code
+  contract and asserts the code paths still emit the exact strings the doc
+  documents (no live farm — `_api` errors via the client seam, the NTLM
+  handshake against a throwaway localhost server).
 - `sample/` — a synthetic SharePoint Server 2019 site collection: recorded `_api`
   fixtures plus the exact `scan-site` / `explain-access` output produced from
   them, covering every finding type. `test/sample.test.ts` drives the real

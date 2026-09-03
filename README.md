@@ -43,7 +43,8 @@ npm install -g github:a-kazemi/sp-permission-analyzer
 
 ## Authentication
 
-v0.1.0 supports **NTLM with explicit credentials only** (see [docs/AUTH.md](docs/AUTH.md)).
+v0.1.0 supports **NTLM with explicit credentials only** (see [docs/AUTH.md](docs/AUTH.md);
+auth failures are catalogued in [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)).
 Provide the auditing account through environment variables — never on the command
 line, where it would show up in the process list:
 
@@ -153,6 +154,12 @@ Both commands accept `--format json` and emit a stable envelope
 | 3 | Authentication failed |
 | 4 | SharePoint reachable but the request failed |
 | 5 | Network / TLS / DNS failure |
+
+Every non-zero exit prints one `error:` line and usually a hint.
+[docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) lists each message with its
+cause and fix — including cases with no dedicated message (clock skew, channel
+binding / Extended Protection, `_api` disabled, reverse proxies, multi-WFE
+affinity).
 
 ## Security
 

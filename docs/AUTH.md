@@ -76,6 +76,11 @@ export NODE_EXTRA_CA_CERTS=/path/to/internal-root-ca.pem
 
 ## Troubleshooting
 
+Full catalogue — every `error:` string with cause and fix, plus conditions that
+have no dedicated message (clock skew, channel binding / Extended Protection,
+`_api` disabled, reverse proxies, multi-WFE affinity) — is in
+[TROUBLESHOOTING.md](TROUBLESHOOTING.md). Quick reference:
+
 | Symptom | Likely cause |
 |---------|--------------|
 | `error: NTLM authentication was rejected (401 after handshake).` | Wrong username / password / domain, or the account is locked out. |
