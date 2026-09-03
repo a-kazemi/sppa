@@ -91,6 +91,45 @@ export class SharePointClient {
     return this.getWeb();
   }
 
+  /** A client rebased on a subweb URL, sharing this authenticated connection. */
+  forWeb(webUrl: string): SharePointClient {
+    return new SharePointClient(this.http, webUrl);
+  }
+
+  /** Immediate child webs of this web (one level; recurse by calling again). */
+  async getSubWebs(): Promise<WebInfo[]> {
+    const rows = await this.getAll<any>(
+      'web/webs?$select=Title,Url,ServerRelativeUrl,HasUniqueRoleAssignments',
+    );
+    return rows.map((w) => ({
+      title: w.Title ?? '',
+      url: w.Url ?? '',
+      serverRelativeUrl: w.ServerRelativeUrl ?? '',
+      hasUniqueRoleAssignments: Boolean(w.HasUniqueRoleAssignments),
+    }));
+  }
+
+  /** One list by title, or null when it does not exist (404). */
+  async getListByTitle(listTitle: string): Promise<ListInfo | null> {
+    const encList = encodeURIComponent(listTitle.replace(/'/g, "''"));
+    try {
+      const l = await this.getJson(
+        `web/lists/getByTitle('${encList}')?$select=Id,Title,HasUniqueRoleAssignments,BaseTemplate,ItemCount,Hidden`,
+      );
+      return {
+        id: String(l.Id),
+        title: l.Title ?? '',
+        hasUniqueRoleAssignments: Boolean(l.HasUniqueRoleAssignments),
+        baseTemplate: Number(l.BaseTemplate ?? 0),
+        itemCount: Number(l.ItemCount ?? 0),
+        hidden: Boolean(l.Hidden),
+      };
+    } catch (err) {
+      if (err instanceof ApiError && /Not found/.test(err.message)) return null;
+      throw err;
+    }
+  }
+
   async getWeb(): Promise<WebInfo> {
     const w = await this.getJson(
       'web?$select=Title,Url,ServerRelativeUrl,HasUniqueRoleAssignments',

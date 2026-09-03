@@ -3,6 +3,7 @@
 import { Credentials } from './auth/httpClient';
 import { explainAccess } from './commands/explainAccess';
 import { scanSite } from './commands/scanSite';
+import { listAccess } from './commands/listAccess';
 import { UsageError } from './util/errors';
 import { color } from './util/ansi';
 import { VERSION } from './version';
@@ -100,6 +101,7 @@ ${color.bold('USAGE')}
 
 ${color.bold('COMMANDS')}
   explain-access   Explain why a user does or does not have access to a site/list
+  list-access      List every principal that has access to a site/list, and how
   scan-site        Audit one site collection: broken inheritance, orphaned SIDs,
                    broad grants, oversized groups, site collection admins
 
@@ -119,16 +121,21 @@ ${color.bold('explain-access OPTIONS')}
   --list <title>          Analyse a specific list instead of the web
   --windows-claims        Auto-prefix the login with i:0#.w| for classic farms
 
+${color.bold('list-access OPTIONS')}
+  --list <title>          List access to a specific list instead of the web
+
 ${color.bold('scan-site OPTIONS')}
   --large-group-threshold <n>   Flag SharePoint groups with >= n members (default: 100)
   --skip-items                  Do not scan list items for unique permissions
   --max-items <n>               Max items to scan per list (default: 20000)
   --include-hidden             Include hidden lists
+  --recurse                    Walk subwebs (web/webs) and merge their findings
 
 ${color.bold('EXAMPLES')}
   export SPPA_USERNAME='CONTOSO\\svc_audit' SPPA_PASSWORD='***'
   sppa explain-access --site https://sp/sites/hr --user 'CONTOSO\\jdoe'
-  sppa scan-site --site https://sp/sites/hr --format json > hr-audit.json
+  sppa list-access --site https://sp/sites/hr --list 'Salary Review'
+  sppa scan-site --site https://sp/sites/hr --recurse --format json > hr-audit.json
 
 Exit codes: 0 ok · 2 usage · 3 auth · 4 API · 5 network
 `;
@@ -173,6 +180,20 @@ export async function run(argv: string[]): Promise<number> {
       process.stdout.write(output + '\n');
       return 0;
     }
+    case 'list-access': {
+      const site = str(flags, 'site') ?? '';
+      const list = str(flags, 'list');
+      const output = await listAccess({
+        site,
+        ...(list === undefined ? {} : { list }),
+        format: format(flags),
+        credentials: resolveCredentials(flags),
+        insecure: bool(flags, 'insecure'),
+        ...(timeoutMs === undefined ? {} : { timeoutMs }),
+      });
+      process.stdout.write(output + '\n');
+      return 0;
+    }
     case 'scan-site': {
       const site = str(flags, 'site') ?? '';
       const output = await scanSite({
@@ -182,6 +203,7 @@ export async function run(argv: string[]): Promise<number> {
         skipItems: bool(flags, 'skip-items'),
         maxItems: int(flags, 'max-items', 20000),
         includeHidden: bool(flags, 'include-hidden'),
+        recurse: bool(flags, 'recurse'),
         credentials: resolveCredentials(flags),
         insecure: bool(flags, 'insecure'),
         ...(timeoutMs === undefined ? {} : { timeoutMs }),

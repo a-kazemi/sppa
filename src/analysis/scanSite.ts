@@ -35,6 +35,12 @@ export interface ScanInput {
   siteUsers: Principal[];
   siteGroups: Array<{ id: number; title: string; ownerTitle: string; users: Principal[] }>;
   largeGroupThreshold: number;
+  /**
+   * Server-relative URL of the web these findings belong to. When set, every
+   * finding is stamped with it so a recursive (`--recurse`) report can say which
+   * subweb each row came from. Omitted for a single-web scan.
+   */
+  webUrl?: string;
 }
 
 export interface BrokenInheritanceFinding {
@@ -43,6 +49,7 @@ export interface BrokenInheritanceFinding {
   url?: string;
   assignmentCount: number;
   principals: string[];
+  web?: string;
 }
 
 export interface OrphanReportItem {
@@ -52,18 +59,21 @@ export interface OrphanReportItem {
   confidence: OrphanConfidence;
   reason: string;
   onAcl: string[];
+  web?: string;
 }
 
 export interface BroadGrantFinding {
   scope: string;
   audience: string;
   roles: string[];
+  web?: string;
 }
 
 export interface LargeGroupFinding {
   title: string;
   memberCount: number;
   owner: string;
+  web?: string;
 }
 
 export interface ScanReport {
@@ -82,6 +92,8 @@ export interface ScanReport {
   broadGrants: BroadGrantFinding[];
   largeGroups: LargeGroupFinding[];
   siteCollectionAdmins: Array<{ loginName: string; title: string }>;
+  /** Number of webs walked. Present only for a recursive scan. */
+  websScanned?: number;
 }
 
 function principalLabel(ra: RoleAssignment): string {
@@ -183,6 +195,13 @@ export function analyzeScan(input: ScanInput): ScanReport {
     .filter((p) => p.isSiteAdmin)
     .map((p) => ({ loginName: p.loginName, title: p.title }));
 
+  if (input.webUrl) {
+    for (const f of brokenInheritance) f.web = input.webUrl;
+    for (const f of orphanedPrincipals) f.web = input.webUrl;
+    for (const f of broadGrants) f.web = input.webUrl;
+    for (const f of largeGroups) f.web = input.webUrl;
+  }
+
   return {
     site: { title: input.web.title, url: input.web.url },
     summary: {
@@ -200,4 +219,50 @@ export function analyzeScan(input: ScanInput): ScanReport {
     largeGroups,
     siteCollectionAdmins,
   };
+}
+
+/**
+ * Combine per-web reports from a recursive scan into one. Findings are
+ * concatenated (each already stamped with its `web`), summary counts are summed,
+ * and site-collection administrators — which are farm-wide, not per-web — are
+ * de-duplicated by login. `site` is taken from the first (root) report.
+ */
+export function mergeScanReports(reports: ScanReport[]): ScanReport {
+  const first = reports[0];
+  if (!first) throw new Error('mergeScanReports: no reports to merge');
+  if (reports.length === 1) return { ...first, websScanned: 1 };
+
+  const brokenInheritance = reports.flatMap((r) => r.brokenInheritance);
+  const orphanedPrincipals = reports.flatMap((r) => r.orphanedPrincipals);
+  const broadGrants = reports.flatMap((r) => r.broadGrants);
+  const largeGroups = reports.flatMap((r) => r.largeGroups);
+
+  const adminsByLogin = new Map<string, { loginName: string; title: string }>();
+  for (const r of reports) {
+    for (const a of r.siteCollectionAdmins) adminsByLogin.set(a.loginName.toLowerCase(), a);
+  }
+  const siteCollectionAdmins = [...adminsByLogin.values()];
+
+  return {
+    site: first.site,
+    summary: {
+      listsScanned: sum(reports, (r) => r.summary.listsScanned),
+      listsWithUniquePermissions: sum(reports, (r) => r.summary.listsWithUniquePermissions),
+      itemsWithUniquePermissions: sum(reports, (r) => r.summary.itemsWithUniquePermissions),
+      orphanedPrincipals: orphanedPrincipals.length,
+      broadGrants: broadGrants.length,
+      largeGroups: largeGroups.length,
+      siteCollectionAdmins: siteCollectionAdmins.length,
+    },
+    brokenInheritance,
+    orphanedPrincipals,
+    broadGrants,
+    largeGroups,
+    siteCollectionAdmins,
+    websScanned: reports.length,
+  };
+}
+
+function sum<T>(items: T[], pick: (t: T) => number): number {
+  return items.reduce((acc, t) => acc + pick(t), 0);
 }

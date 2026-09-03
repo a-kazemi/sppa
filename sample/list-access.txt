@@ -1,0 +1,33 @@
+Who has access
+Site: https://sp.contoso.local/sites/hr
+Scope: web "Human Resources"
+
+Principals with access: 11
+
+SharePoint groups (2)
+  • HR Members — Read
+  • HR Owners — Full Control
+
+Not expandable via REST (2)
+  • [AD security group] CONTOSO\HR-Admins — Full Control
+  • [broad audience] Everyone — Read
+
+Users (9)
+  • Amy Ng <amy.ng@contoso.local> — Read via HR Members
+  • Jane Doe <jane@contoso.local> — Read via HR Members
+  • Joe Diaz <joe.diaz@contoso.local> — Read via HR Members
+  • Kate Roy <kate.roy@contoso.local> — Read via HR Members
+  • Liu Wei <liu.wei@contoso.local> — Read via HR Members
+  • Mark Adams <mark@contoso.local> — Full Control via HR Owners
+  • Ravi Patel <ravi.patel@contoso.local> — Read via HR Members
+  • Sara Kim <sara.kim@contoso.local> — Read via HR Members
+  • Tom Lee <tom.lee@contoso.local> — Read via HR Members
+
+Site collection administrators (1)
+  • Mark Adams i:0#.w|contoso\mark
+
+Notes:
+  • 1 AD security group(s) grant access here. REST cannot expand their membership, so their members are not listed individually.
+  • Site collection administrators have Full Control everywhere regardless of the assignments above.
+
+Read-only. No data left this machine.

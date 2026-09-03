@@ -6,6 +6,24 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- `list-access` — the inverse of `explain-access`: enumerate every principal
+  that has access to a web or list and how. SharePoint groups are expanded to
+  their members (each tagged with the group it came through); AD security groups
+  and broad-audience claims are reported as single unexpandable entries, with a
+  note, since REST cannot expand them. `--list <title>` scopes it to one list and
+  reports when that list inherits from the web. `--format json` emits the
+  standard envelope (`command: "list-access"`). Pure logic in
+  `src/analysis/listAccess.ts`, covered by `test/listAccess.test.ts` and a
+  `sample/list-access.{json,txt}` worked example pinned by `test/sample.test.ts`.
+- `scan-site --recurse` — walk subwebs (`web/webs`) breadth-first (bounded at 500
+  webs) and merge every web's findings into one report. Each finding carries an
+  optional `web` field (server-relative URL) so you can see which subweb it came
+  from, and the summary gains `websScanned`. A non-recursive scan is byte-for-byte
+  unchanged. `mergeScanReports()` in `src/analysis/scanSite.ts`, covered by
+  `test/scanSite.test.ts`.
+
 ## [0.1.1] — 2026-09-03
 
 ### Changed

@@ -21,8 +21,10 @@ import { NtlmHttpClient, HttpResponse } from '../src/auth/httpClient';
 import { SharePointClient } from '../src/sp/client';
 import { analyzeScan, ScanInput } from '../src/analysis/scanSite';
 import { buildAccessTrace, ScopeNode } from '../src/analysis/accessTrace';
-import { renderScanReport, renderAccessTrace } from '../src/report/table';
+import { analyzeListAccess } from '../src/analysis/listAccess';
+import { renderScanReport, renderAccessTrace, renderListAccess } from '../src/report/table';
 import { renderJson, toJsonEnvelope } from '../src/report/json';
+import { Principal } from '../src/sp/principals';
 
 const SITE = 'https://sp.contoso.local/sites/hr';
 const JANE = 'i:0#.w|contoso\\jane';
@@ -192,6 +194,33 @@ async function runExplainDeny(): Promise<string> {
   return renderJson(toJsonEnvelope('explain-access', SITE, result));
 }
 
+/** Mirror of commands/listAccess.ts orchestration for the web scope. */
+async function runListAccess(): Promise<string> {
+  const sp = client();
+  const web = await sp.connect();
+  const [webAssignments, siteGroups, siteUsers] = await Promise.all([
+    sp.getWebRoleAssignments(),
+    sp.getSiteGroupsWithUsers(),
+    sp.getSiteUsers(),
+  ]);
+  const groupMembers = new Map<number, Principal[]>(siteGroups.map((g) => [g.id, g.users]));
+  const emailByLogin = new Map<string, string>();
+  for (const u of siteUsers) if (u.email) emailByLogin.set(u.loginName.toLowerCase(), u.email);
+  const siteCollectionAdmins = siteUsers
+    .filter((u) => u.isSiteAdmin)
+    .map((u) => ({ loginName: u.loginName, title: u.title }));
+  const result = analyzeListAccess({
+    scope: { kind: 'web', title: web.title || web.url, url: web.url },
+    inheritedFromParent: false,
+    governingScopeTitle: web.title || web.url,
+    assignments: webAssignments,
+    groupMembers,
+    emailByLogin,
+    siteCollectionAdmins,
+  });
+  return renderJson(toJsonEnvelope('list-access', SITE, result));
+}
+
 function normalise(json: string): string {
   const obj = JSON.parse(json) as { generatedAt?: string };
   obj.generatedAt = '1970-01-01T00:00:00.000Z';
@@ -275,14 +304,29 @@ test('explain-access --list: contractor is denied on the Salaries list', async (
   assert.ok(out.notes.some((n: string) => n.includes('no access to this scope')));
 });
 
+test('list-access: synthetic farm lists who can reach the HR site', async () => {
+  const out = JSON.parse(await runListAccess()).result;
+  const jane = out.entries.find((e: any) => e.name === 'Jane Doe');
+  assert.ok(jane, 'Jane Doe should be surfaced through her SharePoint group');
+  assert.equal(jane.kind, 'user');
+  assert.equal(jane.via, 'HR Members');
+  assert.ok(out.entries.some((e: any) => e.kind === 'broad-audience' && e.name === 'Everyone'));
+  assert.ok(out.entries.some((e: any) => e.kind === 'ad-group' && e.name === 'CONTOSO\\HR-Admins'));
+  assert.equal(out.siteCollectionAdmins[0].title, 'Mark Adams');
+  assert.ok(out.notes.some((n: string) => /AD security group/.test(n)));
+});
+
 test('committed sample/ worked example is up to date', async () => {
   const scanJson = await runScan();
   const explainJson = await runExplain();
   const explainDenyJson = await runExplainDeny();
+  const listAccessJson = await runListAccess();
   checkSample('scan-site.json', scanJson);
   checkSample('explain-access.json', explainJson);
   checkSample('explain-access-deny.json', explainDenyJson);
+  checkSample('list-access.json', listAccessJson);
   checkSample('scan-site.txt', renderScanReport(JSON.parse(scanJson).result));
   checkSample('explain-access.txt', renderAccessTrace(JSON.parse(explainJson).result, SITE));
   checkSample('explain-access-deny.txt', renderAccessTrace(JSON.parse(explainDenyJson).result, SITE));
+  checkSample('list-access.txt', renderListAccess(JSON.parse(listAccessJson).result, SITE));
 });

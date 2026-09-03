@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { analyzeScan, ScanInput } from '../src/analysis/scanSite';
+import { analyzeScan, mergeScanReports, ScanInput } from '../src/analysis/scanSite';
 import { Principal, PrincipalType, RoleAssignment } from '../src/sp/principals';
 
 const SID = 'S-1-5-21-1004336348-1177238915-682003330-1099';
@@ -95,4 +95,37 @@ test('largeGroupThreshold is inclusive and sorted by size', () => {
   assert.equal(r.largeGroups.length, 1);
   assert.equal(r.largeGroups[0]!.title, 'HR Members');
   assert.equal(r.largeGroups[0]!.memberCount, 4);
+});
+
+test('webUrl stamps every finding for a recursive scan', () => {
+  const input = baseInput();
+  input.webUrl = '/sites/hr/team';
+  const r = analyzeScan(input);
+  assert.ok(r.brokenInheritance.every((b) => b.web === '/sites/hr/team'));
+  assert.ok(r.largeGroups.every((g) => g.web === '/sites/hr/team'));
+});
+
+test('a single-web scan leaves findings unstamped', () => {
+  const r = analyzeScan(baseInput());
+  assert.ok(r.brokenInheritance.every((b) => b.web === undefined));
+  assert.equal(r.websScanned, undefined);
+});
+
+test('mergeScanReports sums counts, concatenates findings, dedupes admins', () => {
+  const root = analyzeScan({ ...baseInput(), webUrl: '/sites/hr' });
+  const sub = analyzeScan({ ...baseInput(), webUrl: '/sites/hr/team' });
+  const merged = mergeScanReports([root, sub]);
+  assert.equal(merged.websScanned, 2);
+  assert.equal(merged.summary.listsScanned, root.summary.listsScanned + sub.summary.listsScanned);
+  assert.equal(merged.brokenInheritance.length, root.brokenInheritance.length + sub.brokenInheritance.length);
+  // Same admin ("Admin") appears in both per-web reports but only once merged.
+  assert.equal(merged.siteCollectionAdmins.length, 1);
+  assert.equal(merged.summary.siteCollectionAdmins, 1);
+});
+
+test('mergeScanReports of one report just tags websScanned = 1', () => {
+  const only = analyzeScan(baseInput());
+  const merged = mergeScanReports([only]);
+  assert.equal(merged.websScanned, 1);
+  assert.deepEqual(merged.brokenInheritance, only.brokenInheritance);
 });

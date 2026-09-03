@@ -9,9 +9,13 @@ line. Built for SharePoint Server 2016, 2019 and Subscription Edition farms.
 - **`explain-access`** — answer "why does this user have access to this site?"
   in one command: direct grants, SharePoint group membership, broad-audience
   claims ("Everyone"), AD security groups, and exactly where inheritance breaks.
-- **`scan-site`** — audit one site collection for broken permission inheritance,
-  orphaned SIDs (deleted AD accounts still on ACLs), broad-audience grants,
-  oversized SharePoint groups, and site collection administrators.
+- **`list-access`** — the inverse: "who has access to this site or list, and
+  how?" SharePoint groups are expanded to their members; AD security groups and
+  broad audiences are flagged as unexpandable.
+- **`scan-site`** — audit one site collection (add `--recurse` for subwebs) for
+  broken permission inheritance, orphaned SIDs (deleted AD accounts still on
+  ACLs), broad-audience grants, oversized SharePoint groups, and site collection
+  administrators.
 
 **Read-only. No data leaves your machine. No telemetry. No account required.**
 The tool only issues `GET` requests to the SharePoint REST API (`_api`).
@@ -98,16 +102,31 @@ sppa explain-access --site https://sharepoint/sites/hr \
   --user 'CONTOSO\jdoe' --list 'Salary Review' --windows-claims
 ```
 
+### List who has access
+
+```bash
+sppa list-access --site https://sharepoint/sites/hr
+sppa list-access --site https://sharepoint/sites/hr --list 'Salary Review'
+```
+
+`list-access` reads the role assignments on the scope (or the parent it inherits
+from), expands every SharePoint group to its members, and reports AD security
+groups and broad audiences ("Everyone") as single entries it cannot expand. See
+[`sample/list-access.txt`](sample/list-access.txt) for the shape of the output.
+
 ### Audit a site collection
 
 ```bash
 sppa scan-site --site https://sharepoint/sites/hr
+sppa scan-site --site https://sharepoint/sites/hr --recurse
 sppa scan-site --site https://sharepoint/sites/hr --format json > hr-audit.json
 ```
 
 `scan-site` walks the web, every visible list, and (unless `--skip-items`) list
-items with unique permissions. Use `--max-items` to bound very large libraries
-and `--large-group-threshold` to tune the oversized-group flag.
+items with unique permissions. Add `--recurse` to walk subwebs too — every
+finding is then tagged with the subweb it came from and the summary reports how
+many webs were scanned. Use `--max-items` to bound very large libraries and
+`--large-group-threshold` to tune the oversized-group flag.
 
 ## Worked example
 
