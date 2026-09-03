@@ -8,6 +8,14 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Automatic retry in the HTTP layer for server throttling (`429` / `503`,
+  honouring `Retry-After` — delta-seconds or HTTP-date) and transient socket
+  errors (`ECONNRESET` / `ETIMEDOUT` / `EPIPE` / …). Full-jitter exponential
+  backoff, 3 attempts by default, each capped at 60s; the whole NTLM handshake is
+  re-run on a fresh socket for every retry. Tunable via new
+  `NtlmHttpClient` options (`retries`, `retryBaseMs`, `maxRetryDelayMs`). Covered
+  by `test/httpClient.test.ts`, which also proves the three-leg handshake wiring
+  against a localhost server for the first time.
 - `list-access` — the inverse of `explain-access`: enumerate every principal
   that has access to a web or list and how. SharePoint groups are expanded to
   their members (each tagged with the group it came through); AD security groups

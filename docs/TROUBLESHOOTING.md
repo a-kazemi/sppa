@@ -115,7 +115,7 @@ Any other `>= 400` status. Common ones:
 | Status | Cause | Fix |
 |--------|-------|-----|
 | `403` | Authenticated, but denied by policy/permission on this exact call (often `getUserEffectivePermissions` when the account lacks *Enumerate Permissions*). | Grant the service account **Full Read** at web-application policy level, or *Enumerate Permissions* on the site. |
-| `429` / `503` with a `Retry-After` | Farm **throttling** (`Set-SPFarmConfig -RequestThrottling`, or a Request Management rule). Large libraries trigger this. | Re-run with `--skip-items`, or lower `--max-items`, or run off-peak. There is no automatic retry/back-off in v0.1.x. |
+| `429` / `503` with a `Retry-After` | Farm **throttling** (`Set-SPFarmConfig -RequestThrottling`, or a Request Management rule). Large libraries trigger this. | The client now retries these automatically — up to 3 times, honouring `Retry-After`, with exponential backoff. If the error still surfaces the farm stayed throttled through every retry: re-run with `--skip-items`, lower `--max-items`, or run off-peak. |
 | `500` with `Microsoft.SharePoint.Client...` in the snippet | A server-side error in the `_api` call — often a corrupt role assignment or an orphaned principal the CSOM layer chokes on. | Note the list/item from `<url>`, fix or remove the bad ACL in the site, re-run. Please attach the snippet to an issue. |
 | `400` on an OData query | A `$filter` / `$select` the farm's SharePoint build does not accept (older CU). | File an issue with your exact SharePoint build number (`Central Admin → Servers in Farm`). |
 

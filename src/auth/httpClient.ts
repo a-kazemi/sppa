@@ -33,7 +33,20 @@ export interface NtlmHttpClientOptions {
   insecure?: boolean;
   /** Per-request timeout in milliseconds. */
   timeoutMs?: number;
+  /**
+   * How many times to retry a throttled (429/503) or transient-socket
+   * (ECONNRESET/ETIMEDOUT/EPIPE) response before giving up. Default 3; 0 disables.
+   */
+  retries?: number;
+  /** Base for the exponential backoff between retries, in ms. Default 500. */
+  retryBaseMs?: number;
+  /** Upper bound on any single backoff / Retry-After wait, in ms. Default 60000. */
+  maxRetryDelayMs?: number;
+  /** Sleep implementation — overridable so tests do not wait in real time. */
+  sleep?: (ms: number) => Promise<void>;
 }
+
+const RETRYABLE_CODES = new Set(['ECONNRESET', 'ETIMEDOUT', 'EPIPE', 'ECONNABORTED', 'EAI_AGAIN']);
 
 interface RawRequestOptions {
   method: string;
@@ -46,6 +59,10 @@ export class NtlmHttpClient {
   private readonly creds: Required<Credentials>;
   private readonly insecure: boolean;
   private readonly timeoutMs: number;
+  private readonly retries: number;
+  private readonly retryBaseMs: number;
+  private readonly maxRetryDelayMs: number;
+  private readonly sleep: (ms: number) => Promise<void>;
   private readonly agents = new Map<string, http.Agent | https.Agent>();
 
   constructor(opts: NtlmHttpClientOptions) {
@@ -57,6 +74,10 @@ export class NtlmHttpClient {
     };
     this.insecure = Boolean(opts.insecure);
     this.timeoutMs = opts.timeoutMs ?? 30000;
+    this.retries = Math.max(0, opts.retries ?? 3);
+    this.retryBaseMs = Math.max(0, opts.retryBaseMs ?? 500);
+    this.maxRetryDelayMs = Math.max(0, opts.maxRetryDelayMs ?? 60000);
+    this.sleep = opts.sleep ?? ((ms) => new Promise((r) => setTimeout(r, ms)));
   }
 
   private agentFor(u: URL): http.Agent | https.Agent {
@@ -108,7 +129,9 @@ export class NtlmHttpClient {
       );
 
       req.setTimeout(this.timeoutMs, () => {
-        req.destroy(new NetworkError(`Request timed out after ${this.timeoutMs}ms: ${opts.url}`));
+        const e = new NetworkError(`Request timed out after ${this.timeoutMs}ms: ${opts.url}`);
+        e.code = 'ETIMEDOUT';
+        req.destroy(e);
       });
       req.on('error', (err: NodeJS.ErrnoException) => reject(mapNetworkError(err, opts.url)));
       if (opts.body) req.write(opts.body);
@@ -116,8 +139,47 @@ export class NtlmHttpClient {
     });
   }
 
-  /** Issue an NTLM-authenticated request, running the handshake if challenged. */
+  /**
+   * Issue an NTLM-authenticated request, retrying on server throttling (429 /
+   * 503, honouring `Retry-After`) and transient socket errors with a jittered
+   * exponential backoff. The whole handshake is re-run on each retry — a fresh
+   * socket, a fresh negotiate.
+   */
   async request(opts: RawRequestOptions): Promise<HttpResponse> {
+    for (let attempt = 0; ; attempt++) {
+      try {
+        const res = await this.attempt(opts);
+        if ((res.status === 429 || res.status === 503) && attempt < this.retries) {
+          await this.sleep(this.retryDelay(res.headers['retry-after'], attempt));
+          continue;
+        }
+        return res;
+      } catch (err) {
+        if (
+          attempt < this.retries &&
+          err instanceof NetworkError &&
+          err.code !== undefined &&
+          RETRYABLE_CODES.has(err.code)
+        ) {
+          await this.sleep(this.retryDelay(undefined, attempt));
+          continue;
+        }
+        throw err;
+      }
+    }
+  }
+
+  /** Milliseconds to wait before retry `attempt` (0-based). */
+  private retryDelay(retryAfter: string | string[] | undefined, attempt: number): number {
+    const fromHeader = parseRetryAfter(retryAfter);
+    if (fromHeader !== undefined) return Math.min(fromHeader, this.maxRetryDelayMs);
+    // Full-jitter exponential backoff: random in [0, base * 2^attempt].
+    const ceiling = Math.min(this.retryBaseMs * 2 ** attempt, this.maxRetryDelayMs);
+    return Math.floor(Math.random() * ceiling);
+  }
+
+  /** One full attempt: raw request, plus the NTLM handshake if challenged. */
+  private async attempt(opts: RawRequestOptions): Promise<HttpResponse> {
     const first = await this.rawRequest(opts);
     if (first.status !== 401) return first;
 
@@ -177,6 +239,19 @@ export class NtlmHttpClient {
   }
 }
 
+/**
+ * Parse an HTTP `Retry-After` header (delta-seconds or an HTTP-date) into a
+ * millisecond delay. Returns undefined when absent or unparseable.
+ */
+function parseRetryAfter(value: string | string[] | undefined): number | undefined {
+  const raw = (Array.isArray(value) ? value[0] : value)?.trim();
+  if (!raw) return undefined;
+  if (/^\d+$/.test(raw)) return Number(raw) * 1000;
+  const when = Date.parse(raw);
+  if (Number.isNaN(when)) return undefined;
+  return Math.max(0, when - Date.now());
+}
+
 function mapNetworkError(err: NodeJS.ErrnoException, url: string): Error {
   if (err instanceof NetworkError || err instanceof AuthError) return err;
   const code = err.code ?? '';
@@ -193,8 +268,10 @@ function mapNetworkError(err: NodeJS.ErrnoException, url: string): Error {
       'TLS certificate host name mismatch. Re-run with --insecure to bypass verification.',
   };
   const hint = hints[code];
-  return new NetworkError(
+  const mapped = new NetworkError(
     `Network error (${code || err.message}) reaching ${url}`,
     ...(hint === undefined ? [] : [hint]),
   );
+  if (code) mapped.code = code;
+  return mapped;
 }

@@ -36,6 +36,9 @@ export class ApiError extends CliError {
 
 /** Network/TLS/DNS failure reaching the farm. Exit code 5. */
 export class NetworkError extends CliError {
+  /** Underlying Node error code (ECONNRESET, ETIMEDOUT, …) when known. */
+  code: string | undefined;
+
   constructor(message: string, hint?: string) {
     super(message, { exitCode: 5, ...(hint === undefined ? {} : { hint }) });
   }
