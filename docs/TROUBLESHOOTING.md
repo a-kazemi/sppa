@@ -77,7 +77,7 @@ already authenticated — so credentials are fine, but this object is off-limits
 |-------|-----|
 | The account can read the site but not this list/library/item. | Grant Read on the specific list, or accept the gap — `scan-site` silently skips what it cannot see, so partial results are still valid. |
 | The `client.svc` / REST endpoint is disabled for the account by a **Web Application Policy** deny, or by `Set-SPWOPIBinding`-style lockdown. | Remove the deny for the service account, or run against a zone without it. |
-| **Request Management** on the farm has a routing/throttling rule that denies `/_api/` for non-interactive user agents. | Add an allow rule for the `sp-permission-analyzer` user agent, or run the audit from a machine/zone the rule does not cover. |
+| **Request Management** on the farm has a routing/throttling rule that denies `/_api/` for non-interactive user agents. | Add an allow rule for the `sppa` user agent, or run the audit from a machine/zone the rule does not cover. |
 
 ---
 

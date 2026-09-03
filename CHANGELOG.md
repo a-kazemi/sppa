@@ -6,6 +6,19 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.1.1] — 2026-09-03
+
+### Changed
+
+- Finished the `spperm` -> `sppa` rename: the JSON envelope `tool` field is now
+  `"sppa"` (was `"sp-permission-analyzer"`, which contradicted the documented
+  `schemaVersion: 1` contract), along with the `--help` banner, the HTTP
+  `User-Agent`, the committed `sample/*.json`, `LICENSE` (`Auto Company` ->
+  `Amir Kazemi`), the `package.json` metadata, and every GitHub URL in the docs
+  and issue templates.
+- The CLI version is now read at runtime from `package.json` rather than being
+  duplicated in `src/version.ts`, so a release bump only touches one file.
+
 ### Added
 
 - `docs/TROUBLESHOOTING.md` — every `error:` string the CLI can print, with its

@@ -16,7 +16,7 @@ line. Built for SharePoint Server 2016, 2019 and Subscription Edition farms.
 **Read-only. No data leaves your machine. No telemetry. No account required.**
 The tool only issues `GET` requests to the SharePoint REST API (`_api`).
 
-> Status: `v0.1.0`, early release. It does one job on classic NTLM farms. If it
+> Status: `v0.1.1`, early release. It does one job on classic NTLM farms. If it
 > is useful — or if it breaks in your environment — please
 > [open an issue](https://github.com/a-kazemi/sppa/issues).
 
@@ -43,7 +43,7 @@ npm install -g github:a-kazemi/sppa
 
 ## Authentication
 
-v0.1.0 supports **NTLM with explicit credentials only** (see [docs/AUTH.md](docs/AUTH.md);
+The `v0.1.x` line supports **NTLM with explicit credentials only** (see [docs/AUTH.md](docs/AUTH.md);
 auth failures are catalogued in [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)).
 Provide the auditing account through environment variables — never on the command
 line, where it would show up in the process list:

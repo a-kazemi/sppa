@@ -89,7 +89,7 @@ export class NtlmHttpClient {
           agent,
           headers: {
             Connection: 'keep-alive',
-            'User-Agent': 'sp-permission-analyzer',
+            'User-Agent': 'sppa',
             ...(opts.headers ?? {}),
           },
         },

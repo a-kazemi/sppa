@@ -92,7 +92,7 @@ function resolveCredentials(flags: Map<string, string | boolean>): Credentials {
   return { username, password, domain, ...(workstation === undefined ? {} : { workstation }) };
 }
 
-const HELP = `${color.bold('sp-permission-analyzer')} v${VERSION}
+const HELP = `${color.bold('sppa')} v${VERSION}
 Explain and audit SharePoint Server on-premises permissions. Read-only.
 
 ${color.bold('USAGE')}

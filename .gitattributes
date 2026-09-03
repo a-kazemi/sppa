@@ -1,0 +1,10 @@
+# Normalise line endings in the repo; let Git decide per-file by content.
+* text=auto
+
+# The sample/ worked example is compared byte-for-byte by test/sample.test.ts.
+# Force LF in the working tree on every platform so the comparison holds under
+# core.autocrlf=true (Windows) as well as in CI.
+sample/**  text eol=lf
+*.ts       text eol=lf
+*.json     text eol=lf
+*.md       text eol=lf

@@ -6,7 +6,7 @@ body:
     attributes:
       value: >
         Before filing: check
-        [docs/TROUBLESHOOTING.md](https://github.com/a-kazemi/sp-permission-analyzer/blob/main/docs/TROUBLESHOOTING.md).
+        [docs/TROUBLESHOOTING.md](https://github.com/a-kazemi/sppa/blob/main/docs/TROUBLESHOOTING.md).
         It lists every `error:` line with a cause and fix. Redact site URLs,
         account names, and group names as you see fit — none of that is needed to
         reproduce a parsing or analysis bug.
@@ -15,7 +15,7 @@ body:
     attributes:
       label: Tool version
       description: Output of `sppa --version`.
-      placeholder: "0.1.0"
+      placeholder: "0.1.1"
     validations:
       required: true
   - type: dropdown

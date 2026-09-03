@@ -31,7 +31,7 @@ tool, so you can read the output before pointing it at anything real.
 
 ## The synthetic farm
 
-The [`sample/`](https://github.com/a-kazemi/sp-permission-analyzer/tree/main/sample)
+The [`sample/`](https://github.com/a-kazemi/sppa/tree/main/sample)
 folder in the repo contains a hand-built SharePoint Server 2019 site collection,
 `https://sp.contoso.local/sites/hr` ("Human Resources"). It is recorded `_api`
 response bodies plus the exact output the tool produces from them. A test
@@ -225,13 +225,13 @@ diff between runs or feed into a report.
 
 ## Honest limits
 
-Version 0.1.0 does one job on classic NTLM farms. What it does not do:
+The `v0.1.x` line does one job on classic NTLM farms. What it does not do:
 
 - **NTLM with an explicit account only.** No AD FS / WS-Federation, no Forms-Based
   Auth, no Kerberos-only endpoints. Auth setup is in
-  [docs/AUTH.md](https://github.com/a-kazemi/sp-permission-analyzer/blob/main/docs/AUTH.md);
+  [docs/AUTH.md](https://github.com/a-kazemi/sppa/blob/main/docs/AUTH.md);
   failure modes are catalogued in
-  [docs/TROUBLESHOOTING.md](https://github.com/a-kazemi/sp-permission-analyzer/blob/main/docs/TROUBLESHOOTING.md).
+  [docs/TROUBLESHOOTING.md](https://github.com/a-kazemi/sppa/blob/main/docs/TROUBLESHOOTING.md).
 - **No AD security-group expansion.** SharePoint REST does not expose it. The tool
   names the AD groups on each ACL, marks them `?`, and relies on
   `getUserEffectivePermissions` — which resolves them server-side — for the verdict.
@@ -241,11 +241,11 @@ Version 0.1.0 does one job on classic NTLM farms. What it does not do:
 
 ## Links
 
-- Repo: https://github.com/a-kazemi/sp-permission-analyzer
+- Repo: https://github.com/a-kazemi/sppa
 - Worked example — the farm above, with verbatim tool output:
-  https://github.com/a-kazemi/sp-permission-analyzer/tree/main/sample
+  https://github.com/a-kazemi/sppa/tree/main/sample
 - Hit an auth failure or a verdict you can't explain? The issue forms are at
-  https://github.com/a-kazemi/sp-permission-analyzer/issues/new/choose — the
+  https://github.com/a-kazemi/sppa/issues/new/choose — the
   *Authentication failure report* is the most useful one right now. There is also a
   *free permission audit* form: if you have a messy permission situation and want a
   second pair of eyes on the `explain-access` / `scan-site` output, open one (no

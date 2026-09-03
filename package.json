@@ -1,6 +1,6 @@
 {
-  "name": "sp-permission-analyzer",
-  "version": "0.1.0",
+  "name": "sppa",
+  "version": "0.1.1",
   "description": "Explain and audit SharePoint Server on-premises permissions from the command line. Read-only, no data egress, no telemetry.",
   "bin": {
     "sppa": "dist/src/index.js"
@@ -40,16 +40,16 @@
     "ntlm",
     "cli"
   ],
-  "author": "Auto Company",
+  "author": "Amir Kazemi",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/a-kazemi/sp-permission-analyzer.git"
+    "url": "https://github.com/a-kazemi/sppa.git"
   },
   "bugs": {
-    "url": "https://github.com/a-kazemi/sp-permission-analyzer/issues"
+    "url": "https://github.com/a-kazemi/sppa/issues"
   },
-  "homepage": "https://github.com/a-kazemi/sp-permission-analyzer#readme",
+  "homepage": "https://github.com/a-kazemi/sppa#readme",
   "devDependencies": {
     "@types/node": "^20.14.0",
     "typescript": "^5.6.0"

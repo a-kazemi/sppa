@@ -3,7 +3,7 @@
 const SCHEMA_VERSION = 1;
 
 export interface JsonEnvelope<T> {
-  tool: 'sp-permission-analyzer';
+  tool: 'sppa';
   schemaVersion: number;
   command: string;
   generatedAt: string;
@@ -13,7 +13,7 @@ export interface JsonEnvelope<T> {
 
 export function toJsonEnvelope<T>(command: string, site: string, result: T): JsonEnvelope<T> {
   return {
-    tool: 'sp-permission-analyzer',
+    tool: 'sppa',
     schemaVersion: SCHEMA_VERSION,
     command,
     generatedAt: new Date().toISOString(),

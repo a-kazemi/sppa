@@ -7,7 +7,7 @@ body:
       value: >
         v0.1.x does **NTLM with explicit credentials only** — no Kerberos-only
         endpoints, no AD FS / WS-Federation, no Forms-Based Auth. First check
-        [docs/TROUBLESHOOTING.md § Exit 3](https://github.com/a-kazemi/sp-permission-analyzer/blob/main/docs/TROUBLESHOOTING.md#exit-3--authentication);
+        [docs/TROUBLESHOOTING.md § Exit 3](https://github.com/a-kazemi/sppa/blob/main/docs/TROUBLESHOOTING.md#exit-3--authentication);
         it covers clock skew, Extended Protection / channel binding, multi-WFE
         affinity, and reverse proxies. If none of it fits, this report is exactly
         what helps most. **Never paste credentials or tokens.**
