@@ -1,6 +1,6 @@
-# sp-permission-analyzer
+# spperm
 
-[![CI](https://github.com/a-kazemi/sp-permission-analyzer/actions/workflows/ci.yml/badge.svg)](https://github.com/a-kazemi/sp-permission-analyzer/actions/workflows/ci.yml)
+[![CI](https://github.com/a-kazemi/spperm/actions/workflows/ci.yml/badge.svg)](https://github.com/a-kazemi/spperm/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 Explain and audit **SharePoint Server on-premises** permissions from the command
@@ -18,7 +18,7 @@ The tool only issues `GET` requests to the SharePoint REST API (`_api`).
 
 > Status: `v0.1.0`, early release. It does one job on classic NTLM farms. If it
 > is useful — or if it breaks in your environment — please
-> [open an issue](https://github.com/a-kazemi/sp-permission-analyzer/issues).
+> [open an issue](https://github.com/a-kazemi/spperm/issues).
 
 ---
 
@@ -27,8 +27,8 @@ The tool only issues `GET` requests to the SharePoint REST API (`_api`).
 Requires **Node.js 18 or newer**. Not on npm yet — install from source:
 
 ```bash
-git clone https://github.com/a-kazemi/sp-permission-analyzer.git
-cd sp-permission-analyzer
+git clone https://github.com/a-kazemi/spperm.git
+cd spperm
 npm install && npm run build
 npm link            # puts `spperm` on your PATH
 
@@ -38,7 +38,7 @@ spperm --help
 Or install straight from GitHub:
 
 ```bash
-npm install -g github:a-kazemi/sp-permission-analyzer
+npm install -g github:a-kazemi/spperm
 ```
 
 ## Authentication
@@ -130,7 +130,7 @@ Both commands accept `--format json` and emit a stable envelope
 
 ```json
 {
-  "tool": "sp-permission-analyzer",
+  "tool": "spperm",
   "schemaVersion": 1,
   "command": "scan-site",
   "generatedAt": "2026-09-03T12:00:00.000Z",
@@ -176,11 +176,11 @@ from the environment and never logged.
 This is an early release and the fastest way to make it better is to hear from
 people running real farms.
 
-- **Hit a bug or an auth failure?** [Open an issue](https://github.com/a-kazemi/sp-permission-analyzer/issues/new/choose)
+- **Hit a bug or an auth failure?** [Open an issue](https://github.com/a-kazemi/spperm/issues/new/choose)
   with your SharePoint version and the (redacted) error — the
   *Authentication failure report* form is the one we most want filled in right now.
 - **Have a messy permission situation you'd like a second pair of eyes on?**
-  Use the [*free permission audit*](https://github.com/a-kazemi/sp-permission-analyzer/issues/new/choose)
+  Use the [*free permission audit*](https://github.com/a-kazemi/spperm/issues/new/choose)
   form (no data required) and we'll help you read the `explain-access` /
   `scan-site` output and figure out what to fix — free, no strings. We're doing
   this to learn which problems matter most.
