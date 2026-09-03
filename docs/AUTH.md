@@ -23,15 +23,15 @@ authenticates the TCP connection rather than the individual request.
 Preferred — environment variables (not visible in the process list):
 
 ```bash
-export SPPERM_USERNAME='CONTOSO\svc_audit'   # DOMAIN\user, or plain user + --domain
-export SPPERM_PASSWORD='...'
-export SPPERM_DOMAIN='CONTOSO'               # optional if DOMAIN\user is used
+export SPPA_USERNAME='CONTOSO\svc_audit'   # DOMAIN\user, or plain user + --domain
+export SPPA_PASSWORD='...'
+export SPPA_DOMAIN='CONTOSO'               # optional if DOMAIN\user is used
 ```
 
 Fallback — flags (`--username`, `--password`, `--domain`). Using `--password`
 prints a warning; avoid it on shared hosts.
 
-The domain is resolved in this order: `--domain` → `SPPERM_DOMAIN` → the
+The domain is resolved in this order: `--domain` → `SPPA_DOMAIN` → the
 `DOMAIN\` prefix of the username → empty.
 
 ## Which account to use
@@ -65,7 +65,7 @@ bypass verification (understand the risk — you lose protection against a
 man-in-the-middle):
 
 ```bash
-spperm scan-site --site https://sharepoint/sites/hr --insecure
+sppa scan-site --site https://sharepoint/sites/hr --insecure
 ```
 
 A cleaner alternative is to trust your internal CA for Node:

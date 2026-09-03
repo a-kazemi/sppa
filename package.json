@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Explain and audit SharePoint Server on-premises permissions from the command line. Read-only, no data egress, no telemetry.",
   "bin": {
-    "spperm": "dist/src/index.js"
+    "sppa": "dist/src/index.js"
   },
   "main": "dist/src/index.js",
   "type": "commonjs",

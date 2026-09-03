@@ -14,7 +14,7 @@ body:
     id: version
     attributes:
       label: Tool version
-      description: Output of `spperm --version`.
+      description: Output of `sppa --version`.
       placeholder: "0.1.0"
     validations:
       required: true

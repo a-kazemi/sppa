@@ -25,19 +25,19 @@ function capture(): { restore: () => void; out: () => string } {
 
 function withoutCredsEnv<T>(fn: () => T): T {
   const saved = {
-    u: process.env['SPPERM_USERNAME'],
-    p: process.env['SPPERM_PASSWORD'],
-    d: process.env['SPPERM_DOMAIN'],
+    u: process.env['SPPA_USERNAME'],
+    p: process.env['SPPA_PASSWORD'],
+    d: process.env['SPPA_DOMAIN'],
   };
-  delete process.env['SPPERM_USERNAME'];
-  delete process.env['SPPERM_PASSWORD'];
-  delete process.env['SPPERM_DOMAIN'];
+  delete process.env['SPPA_USERNAME'];
+  delete process.env['SPPA_PASSWORD'];
+  delete process.env['SPPA_DOMAIN'];
   try {
     return fn();
   } finally {
-    if (saved.u !== undefined) process.env['SPPERM_USERNAME'] = saved.u;
-    if (saved.p !== undefined) process.env['SPPERM_PASSWORD'] = saved.p;
-    if (saved.d !== undefined) process.env['SPPERM_DOMAIN'] = saved.d;
+    if (saved.u !== undefined) process.env['SPPA_USERNAME'] = saved.u;
+    if (saved.p !== undefined) process.env['SPPA_PASSWORD'] = saved.p;
+    if (saved.d !== undefined) process.env['SPPA_DOMAIN'] = saved.d;
   }
 }
 

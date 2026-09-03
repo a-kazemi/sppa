@@ -1,6 +1,6 @@
-# spperm
+# sppa
 
-[![CI](https://github.com/a-kazemi/spperm/actions/workflows/ci.yml/badge.svg)](https://github.com/a-kazemi/spperm/actions/workflows/ci.yml)
+[![CI](https://github.com/a-kazemi/sppa/actions/workflows/ci.yml/badge.svg)](https://github.com/a-kazemi/sppa/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 Explain and audit **SharePoint Server on-premises** permissions from the command
@@ -18,7 +18,7 @@ The tool only issues `GET` requests to the SharePoint REST API (`_api`).
 
 > Status: `v0.1.0`, early release. It does one job on classic NTLM farms. If it
 > is useful — or if it breaks in your environment — please
-> [open an issue](https://github.com/a-kazemi/spperm/issues).
+> [open an issue](https://github.com/a-kazemi/sppa/issues).
 
 ---
 
@@ -27,18 +27,18 @@ The tool only issues `GET` requests to the SharePoint REST API (`_api`).
 Requires **Node.js 18 or newer**. Not on npm yet — install from source:
 
 ```bash
-git clone https://github.com/a-kazemi/spperm.git
-cd spperm
+git clone https://github.com/a-kazemi/sppa.git
+cd sppa
 npm install && npm run build
-npm link            # puts `spperm` on your PATH
+npm link            # puts `sppa` on your PATH
 
-spperm --help
+sppa --help
 ```
 
 Or install straight from GitHub:
 
 ```bash
-npm install -g github:a-kazemi/spperm
+npm install -g github:a-kazemi/sppa
 ```
 
 ## Authentication
@@ -49,10 +49,10 @@ Provide the auditing account through environment variables — never on the comm
 line, where it would show up in the process list:
 
 ```bash
-export SPPERM_USERNAME='CONTOSO\svc_audit'
-export SPPERM_PASSWORD='...'
+export SPPA_USERNAME='CONTOSO\svc_audit'
+export SPPA_PASSWORD='...'
 # optional; also parsed from DOMAIN\user above
-export SPPERM_DOMAIN='CONTOSO'
+export SPPA_DOMAIN='CONTOSO'
 ```
 
 A read-only account works for everything except item-level scanning inside lists
@@ -63,7 +63,7 @@ where it lacks access — those items are simply skipped.
 ### Explain why a user has access
 
 ```bash
-spperm explain-access --site https://sharepoint/sites/hr --user 'CONTOSO\jdoe'
+sppa explain-access --site https://sharepoint/sites/hr --user 'CONTOSO\jdoe'
 ```
 
 ```
@@ -94,15 +94,15 @@ Notes:
 Scope it to a single list, or handle classic Windows-claims logins:
 
 ```bash
-spperm explain-access --site https://sharepoint/sites/hr \
+sppa explain-access --site https://sharepoint/sites/hr \
   --user 'CONTOSO\jdoe' --list 'Salary Review' --windows-claims
 ```
 
 ### Audit a site collection
 
 ```bash
-spperm scan-site --site https://sharepoint/sites/hr
-spperm scan-site --site https://sharepoint/sites/hr --format json > hr-audit.json
+sppa scan-site --site https://sharepoint/sites/hr
+sppa scan-site --site https://sharepoint/sites/hr --format json > hr-audit.json
 ```
 
 `scan-site` walks the web, every visible list, and (unless `--skip-items`) list
@@ -130,7 +130,7 @@ Both commands accept `--format json` and emit a stable envelope
 
 ```json
 {
-  "tool": "spperm",
+  "tool": "sppa",
   "schemaVersion": 1,
   "command": "scan-site",
   "generatedAt": "2026-09-03T12:00:00.000Z",
@@ -176,11 +176,11 @@ from the environment and never logged.
 This is an early release and the fastest way to make it better is to hear from
 people running real farms.
 
-- **Hit a bug or an auth failure?** [Open an issue](https://github.com/a-kazemi/spperm/issues/new/choose)
+- **Hit a bug or an auth failure?** [Open an issue](https://github.com/a-kazemi/sppa/issues/new/choose)
   with your SharePoint version and the (redacted) error — the
   *Authentication failure report* form is the one we most want filled in right now.
 - **Have a messy permission situation you'd like a second pair of eyes on?**
-  Use the [*free permission audit*](https://github.com/a-kazemi/spperm/issues/new/choose)
+  Use the [*free permission audit*](https://github.com/a-kazemi/sppa/issues/new/choose)
   form (no data required) and we'll help you read the `explain-access` /
   `scan-site` output and figure out what to fix — free, no strings. We're doing
   this to learn which problems matter most.

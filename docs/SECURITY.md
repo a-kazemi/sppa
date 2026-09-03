@@ -15,7 +15,7 @@ to be boring and inspectable.
   capture: traffic goes to your farm and nowhere else.
 - **Nothing is written to disk** unless you redirect output yourself
   (`--format json > file`). No cache, no temp files, no log file.
-- **Credentials** are read from `SPPERM_USERNAME` / `SPPERM_PASSWORD`
+- **Credentials** are read from `SPPA_USERNAME` / `SPPA_PASSWORD`
   (or flags) and held in memory only. They are never logged, never included in
   error messages, and never written anywhere. Passing `--password` triggers a
   warning because it is visible in the host's process list.

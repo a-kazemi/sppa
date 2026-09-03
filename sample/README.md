@@ -2,7 +2,7 @@
 
 Everything in this folder is **synthetic**. There is no real SharePoint farm
 called `contoso.local`; the data was written by hand to exercise every finding
-the tool produces. Use it to see what `spperm` reports *before* you point it at
+the tool produces. Use it to see what `sppa` reports *before* you point it at
 your own farm.
 
 ## The fictional farm
@@ -31,9 +31,9 @@ the tool looks for:
 | Path | What it is |
 |---|---|
 | `api/*.json` | The recorded SharePoint `_api` (REST) response bodies for the farm above — the tool's raw input |
-| `scan-site.json` / `scan-site.txt` | `spperm scan-site --site https://sp.contoso.local/sites/hr` output, JSON and table |
-| `explain-access.json` / `explain-access.txt` | `spperm explain-access --site https://sp.contoso.local/sites/hr --user 'i:0#.w\|contoso\jane'` output — an **ALLOW** trace at the web scope |
-| `explain-access-deny.json` / `explain-access-deny.txt` | `spperm explain-access --site https://sp.contoso.local/sites/hr --user 'i:0#.w\|contoso\rlee' --list Salaries` output — a **DENY** trace at a list scope |
+| `scan-site.json` / `scan-site.txt` | `sppa scan-site --site https://sp.contoso.local/sites/hr` output, JSON and table |
+| `explain-access.json` / `explain-access.txt` | `sppa explain-access --site https://sp.contoso.local/sites/hr --user 'i:0#.w\|contoso\jane'` output — an **ALLOW** trace at the web scope |
+| `explain-access-deny.json` / `explain-access-deny.txt` | `sppa explain-access --site https://sp.contoso.local/sites/hr --user 'i:0#.w\|contoso\rlee' --list Salaries` output — a **DENY** trace at a list scope |
 
 `generatedAt` in the committed JSON is zeroed to `1970-01-01T00:00:00.000Z`; the
 real CLI stamps the current time.

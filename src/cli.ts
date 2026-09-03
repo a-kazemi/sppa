@@ -66,9 +66,9 @@ function format(flags: Map<string, string | boolean>): 'table' | 'json' {
 }
 
 function resolveCredentials(flags: Map<string, string | boolean>): Credentials {
-  let username = str(flags, 'username') ?? process.env['SPPERM_USERNAME'] ?? '';
-  let domain = str(flags, 'domain') ?? process.env['SPPERM_DOMAIN'] ?? '';
-  const password = str(flags, 'password') ?? process.env['SPPERM_PASSWORD'] ?? '';
+  let username = str(flags, 'username') ?? process.env['SPPA_USERNAME'] ?? '';
+  let domain = str(flags, 'domain') ?? process.env['SPPA_DOMAIN'] ?? '';
+  const password = str(flags, 'password') ?? process.env['SPPA_PASSWORD'] ?? '';
 
   if (username.includes('\\')) {
     const [d, u] = username.split('\\');
@@ -79,13 +79,13 @@ function resolveCredentials(flags: Map<string, string | boolean>): Credentials {
   if (!username || !password) {
     throw new UsageError(
       'Missing credentials.',
-      'Set SPPERM_USERNAME and SPPERM_PASSWORD (recommended), or pass --username / --password. ' +
+      'Set SPPA_USERNAME and SPPA_PASSWORD (recommended), or pass --username / --password. ' +
         'Use DOMAIN\\user, or add --domain. See docs/AUTH.md.',
     );
   }
   if (str(flags, 'password') !== undefined) {
     process.stderr.write(
-      color.yellow('warning: --password is visible in the process list; prefer SPPERM_PASSWORD\n'),
+      color.yellow('warning: --password is visible in the process list; prefer SPPA_PASSWORD\n'),
     );
   }
   const workstation = str(flags, 'workstation');
@@ -96,7 +96,7 @@ const HELP = `${color.bold('sp-permission-analyzer')} v${VERSION}
 Explain and audit SharePoint Server on-premises permissions. Read-only.
 
 ${color.bold('USAGE')}
-  spperm <command> [options]
+  sppa <command> [options]
 
 ${color.bold('COMMANDS')}
   explain-access   Explain why a user does or does not have access to a site/list
@@ -108,9 +108,9 @@ ${color.bold('COMMON OPTIONS')}
   --format table|json     Output format (default: table)
   --insecure              Do not verify TLS certificates (self-signed farms)
   --timeout <ms>          Per-request timeout (default: 30000)
-  --username <user>       Auth account; or set SPPERM_USERNAME. Accepts DOMAIN\\user
-  --password <pass>       Auth password; prefer SPPERM_PASSWORD (env)
-  --domain <domain>       NetBIOS domain; or set SPPERM_DOMAIN
+  --username <user>       Auth account; or set SPPA_USERNAME. Accepts DOMAIN\\user
+  --password <pass>       Auth password; prefer SPPA_PASSWORD (env)
+  --domain <domain>       NetBIOS domain; or set SPPA_DOMAIN
   -h, --help              Show this help
   -v, --version           Show version
 
@@ -126,9 +126,9 @@ ${color.bold('scan-site OPTIONS')}
   --include-hidden             Include hidden lists
 
 ${color.bold('EXAMPLES')}
-  export SPPERM_USERNAME='CONTOSO\\svc_audit' SPPERM_PASSWORD='***'
-  spperm explain-access --site https://sp/sites/hr --user 'CONTOSO\\jdoe'
-  spperm scan-site --site https://sp/sites/hr --format json > hr-audit.json
+  export SPPA_USERNAME='CONTOSO\\svc_audit' SPPA_PASSWORD='***'
+  sppa explain-access --site https://sp/sites/hr --user 'CONTOSO\\jdoe'
+  sppa scan-site --site https://sp/sites/hr --format json > hr-audit.json
 
 Exit codes: 0 ok · 2 usage · 3 auth · 4 API · 5 network
 `;
@@ -191,6 +191,6 @@ export async function run(argv: string[]): Promise<number> {
       return 0;
     }
     default:
-      throw new UsageError(`Unknown command "${command ?? ''}". Run "spperm --help".`);
+      throw new UsageError(`Unknown command "${command ?? ''}". Run "sppa --help".`);
   }
 }

@@ -24,7 +24,7 @@ For one user on one site that is maybe twenty minutes of clicking and PowerShell
 nothing is unusual. Across a whole site collection, under audit pressure, it is a
 day you did not plan to spend.
 
-`spperm explain-access` does that walk for one user and prints the result. It is
+`sppa explain-access` does that walk for one user and prints the result. It is
 read-only: it issues `GET` requests to the SharePoint REST API (`_api`) and nothing
 else. Below is a full worked example against a synthetic farm that ships with the
 tool, so you can read the output before pointing it at anything real.
@@ -48,7 +48,7 @@ administrator.
 Command:
 
 ```
-spperm explain-access --site https://sp.contoso.local/sites/hr --user 'i:0#.w|contoso\jane'
+sppa explain-access --site https://sp.contoso.local/sites/hr --user 'i:0#.w|contoso\jane'
 ```
 
 Output:
@@ -130,7 +130,7 @@ what the tool could not verify on its own, not a hole in the answer.
 Same command, scoped this time to a single list:
 
 ```
-spperm explain-access --site https://sp.contoso.local/sites/hr --user 'i:0#.w|contoso\rlee' --list Salaries
+sppa explain-access --site https://sp.contoso.local/sites/hr --user 'i:0#.w|contoso\rlee' --list Salaries
 ```
 
 Output:

@@ -1,6 +1,6 @@
 # Troubleshooting
 
-Every failure in `spperm` prints one line to stderr:
+Every failure in `sppa` prints one line to stderr:
 
 ```
 error: <message>
@@ -20,7 +20,7 @@ This page lists the exact message you will see, the cause, and the fix. Entries
 are written so a maintainer can paste one straight into a GitHub issue reply.
 
 The tool is **read-only** and sends only `GET` requests — nothing here can be
-caused by `spperm` changing anything on the farm.
+caused by `sppa` changing anything on the farm.
 
 ---
 
@@ -34,7 +34,7 @@ The three-leg NTLM handshake completed and SharePoint still answered `401`.
 
 | Cause | Fix |
 |-------|-----|
-| Wrong password, or `--domain` / `SPPERM_DOMAIN` does not match the account's NetBIOS domain. | Re-check all three. Use `DOMAIN\user` in `--username` so the domain cannot be ambiguous. |
+| Wrong password, or `--domain` / `SPPA_DOMAIN` does not match the account's NetBIOS domain. | Re-check all three. Use `DOMAIN\user` in `--username` so the domain cannot be ambiguous. |
 | Account locked out or password expired. | Unlock / reset. A dedicated service account with a non-expiring password avoids repeat incidents. |
 | The account has no rights **anywhere** on the web application, so SharePoint rejects it at the door rather than at `_api`. | Grant the account at least **Read** on the target site collection. |
 | **Clock skew.** The NTLMv2 response embeds a timestamp; if the client clock is more than ~5 minutes off the DC, the response is refused and you get a 401 that looks exactly like a bad password. | Sync the client clock: `w32tm /resync` (Windows) or `sudo chronyc makestep` / `ntpdate` (Linux). Then retry. |
@@ -65,7 +65,7 @@ The tool sent the Type 1 (NEGOTIATE) message and the reply to it had no
 |-------|-----|
 | NTLM is half-configured: advertised on the first `401` but not actually serviced. | Re-check `Windows Authentication → Providers` on every WFE — they must match. |
 | **Multiple WFEs without session affinity.** Leg 1 of the handshake lands on WFE-A, leg 2 on WFE-B, which has no in-flight handshake state. Symptom is *intermittent* — succeeds on retry. | Enable source-IP / cookie affinity on the load balancer, or point `--site` at a single WFE for the audit run. |
-| A reverse proxy is not keeping the connection pinned (NTLM authenticates the TCP connection, not the request). | Configure the proxy for NTLM pass-through with connection affinity, or run `spperm` from inside the network with a direct route to the farm. |
+| A reverse proxy is not keeping the connection pinned (NTLM authenticates the TCP connection, not the request). | Configure the proxy for NTLM pass-through with connection affinity, or run `sppa` from inside the network with a direct route to the farm. |
 | Account locked out between leg 1 and leg 3. | Unlock; retry. |
 
 ### `error: Not authorised for <url>`
@@ -171,7 +171,7 @@ Internal farms usually use a private CA or a self-signed certificate.
 | Fix | Notes |
 |-----|-------|
 | **Preferred:** `export NODE_EXTRA_CA_CERTS=/path/to/internal-root-ca.pem` and re-run. | Keeps certificate verification on. |
-| `spperm ... --insecure` | Disables verification for the run. You lose protection against a man-in-the-middle — only on a trusted network. |
+| `sppa ... --insecure` | Disables verification for the run. You lose protection against a man-in-the-middle — only on a trusted network. |
 | `ERR_TLS_CERT_ALTNAME_INVALID` specifically | The certificate is valid but does not list the host name you used. Use the host name in the certificate's SAN, or `--insecure`. |
 
 ---
@@ -180,7 +180,7 @@ Internal farms usually use a private CA or a self-signed certificate.
 
 ### Proxy interference
 
-`spperm` v0.1.x does **not** read `HTTP_PROXY` / `HTTPS_PROXY` and always
+`sppa` v0.1.x does **not** read `HTTP_PROXY` / `HTTPS_PROXY` and always
 connects directly. A corporate proxy in the path shows up as one of:
 
 - `Network error (ECONNREFUSED / ETIMEDOUT)` — direct route is blocked, proxy required.
@@ -188,7 +188,7 @@ connects directly. A corporate proxy in the path shows up as one of:
 - A TLS error naming the **proxy's** certificate, not SharePoint's.
 - `Server did not return an NTLM Type 2 challenge` — proxy broke connection pinning.
 
-Fix: run `spperm` from a host with a **direct** network route to the farm (a
+Fix: run `sppa` from a host with a **direct** network route to the farm (a
 jump box inside the datacentre network). Proxy support may be added on request.
 
 ### The `401` loop / handshake never terminates
