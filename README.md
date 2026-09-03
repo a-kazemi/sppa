@@ -206,4 +206,4 @@ forward.
 
 ## License
 
-MIT © Auto Company
+MIT 
