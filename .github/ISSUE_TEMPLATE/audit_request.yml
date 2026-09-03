@@ -1,0 +1,61 @@
+name: Free permission audit / share a result
+description: Have a messy on-prem permission situation you want a second pair of eyes on, or a result you want to share? No farm data required.
+labels: [audit-request]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        This is an early release and the fastest way to make it better is to
+        hear from people running real farms. Describe the situation — you do
+        **not** need to paste any output, group names, or account names. We will
+        help you read the `explain-access` / `scan-site` result and work out what
+        to fix. Free, no strings; we are doing this to learn which problems
+        matter most.
+  - type: input
+    id: org
+    attributes:
+      label: Organisation (optional)
+      description: Helps us understand who runs into this. Leave blank if you would rather not say.
+  - type: dropdown
+    id: sp-version
+    attributes:
+      label: SharePoint Server version
+      options:
+        - "2016"
+        - "2019"
+        - Subscription Edition
+        - "2013"
+        - Mixed / multiple farms
+    validations:
+      required: true
+  - type: dropdown
+    id: scale
+    attributes:
+      label: Rough scale
+      options:
+        - One site collection
+        - A few site collections
+        - "Dozens of site collections"
+        - "Hundreds+ / whole farm"
+    validations:
+      required: true
+  - type: textarea
+    id: situation
+    attributes:
+      label: What are you trying to figure out?
+      description: e.g. "who can actually see this HR library and why", "find broken inheritance before a migration", "orphaned accounts still on ACLs".
+    validations:
+      required: true
+  - type: dropdown
+    id: cadence
+    attributes:
+      label: Is this a one-off or recurring need?
+      options:
+        - One-off (migration, incident, audit)
+        - Recurring (quarterly access review, ongoing governance)
+        - Not sure yet
+  - type: textarea
+    id: gaps
+    attributes:
+      label: Anything the tool does not do that you need? (optional)
+      description: Multi-farm, scheduled snapshots, drift diffing, AD FS/FBA auth, HTML report, a supported build — tell us what would make this worth paying for, if anything.

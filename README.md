@@ -173,13 +173,14 @@ from the environment and never logged.
 This is an early release and the fastest way to make it better is to hear from
 people running real farms.
 
-- **Hit a bug or an auth failure?** [Open an issue](https://github.com/a-kazemi/sp-permission-analyzer/issues)
-  with your SharePoint version and the (redacted) error — auth-handshake reports
-  are especially valuable right now.
+- **Hit a bug or an auth failure?** [Open an issue](https://github.com/a-kazemi/sp-permission-analyzer/issues/new/choose)
+  with your SharePoint version and the (redacted) error — the
+  *Authentication failure report* form is the one we most want filled in right now.
 - **Have a messy permission situation you'd like a second pair of eyes on?**
-  Open an issue describing it (no data required) and we'll help you read the
-  `explain-access` / `scan-site` output and figure out what to fix — free, no
-  strings. We're doing this to learn which problems matter most.
+  Use the [*free permission audit*](https://github.com/a-kazemi/sp-permission-analyzer/issues/new/choose)
+  form (no data required) and we'll help you read the `explain-access` /
+  `scan-site` output and figure out what to fix — free, no strings. We're doing
+  this to learn which problems matter most.
 
 ## Development
 
@@ -195,6 +196,10 @@ the [MS-NLMP] test vectors — no live farm needed to hack on them.
 `test/sample.test.ts` runs the whole `_api` → parse → analyse → render pipeline
 against the synthetic farm in [`sample/`](sample/) and fails if the committed
 output there goes stale.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for what is in and out of scope — `v0.1.x`
+is feature-frozen; bug fixes, docs, tests, and auth reports are what move it
+forward.
 
 ## License
 

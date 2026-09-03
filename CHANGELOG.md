@@ -27,6 +27,12 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `NO ACCESS`, showing how a DENY verdict renders and how an unexpandable AD
   security group on the ACL is still surfaced (marked uncertain) while the empty
   effective-permission mask stays authoritative. Pinned by `test/sample.test.ts`.
+- `CONTRIBUTING.md` and GitHub issue forms (`.github/ISSUE_TEMPLATE/`) — a bug
+  report, a dedicated authentication-failure report mirroring the
+  `docs/TROUBLESHOOTING.md § Exit 3` checklist, and a "free permission audit /
+  share a result" intake — plus a pull-request template. `CONTRIBUTING.md`
+  states the `v0.1.x` feature freeze so out-of-scope PRs are not wasted work.
+  Docs/infra only; no code or CLI change.
 
 ## [0.1.0] — 2026-09-03
 

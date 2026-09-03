@@ -1,0 +1,12 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or discussion
+    url: https://github.com/a-kazemi/sp-permission-analyzer/discussions
+    about: >
+      Not sure if it is a bug? Want to talk through an approach or ask how to
+      read the output? Open a discussion instead of an issue.
+  - name: Report a security vulnerability (private)
+    url: https://github.com/a-kazemi/sp-permission-analyzer/security/advisories/new
+    about: >
+      Anything sensitive goes through a private security advisory, not a public
+      issue. See docs/SECURITY.md.

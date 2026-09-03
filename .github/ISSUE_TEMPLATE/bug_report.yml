@@ -1,0 +1,77 @@
+name: Bug report
+description: Something the tool got wrong, crashed on, or printed unclearly (not an auth failure — use the auth report for those).
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        Before filing: check
+        [docs/TROUBLESHOOTING.md](https://github.com/a-kazemi/sp-permission-analyzer/blob/main/docs/TROUBLESHOOTING.md).
+        It lists every `error:` line with a cause and fix. Redact site URLs,
+        account names, and group names as you see fit — none of that is needed to
+        reproduce a parsing or analysis bug.
+  - type: input
+    id: version
+    attributes:
+      label: Tool version
+      description: Output of `spperm --version`.
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: command
+    attributes:
+      label: Command
+      options:
+        - explain-access
+        - scan-site
+        - other / not command-specific
+    validations:
+      required: true
+  - type: dropdown
+    id: sp-version
+    attributes:
+      label: SharePoint Server version
+      options:
+        - "2016"
+        - "2019"
+        - Subscription Edition
+        - "2013"
+        - Not sure
+    validations:
+      required: true
+  - type: dropdown
+    id: exit-code
+    attributes:
+      label: Exit code
+      description: See the Exit codes table in the README.
+      options:
+        - "0 — succeeded but the result is wrong"
+        - "2 — usage error"
+        - "3 — authentication failed (consider the auth report instead)"
+        - "4 — SharePoint reachable but the request failed"
+        - "5 — network / TLS / DNS failure"
+        - Process crashed with a stack trace
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected vs. what happened
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Command and output
+      description: The command you ran (redact as needed) and the full output, including the `error:` line and any hint.
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: node
+    attributes:
+      label: Node.js version
+      placeholder: "node --version"
+    validations:
+      required: true

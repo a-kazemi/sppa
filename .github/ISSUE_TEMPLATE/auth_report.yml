@@ -1,0 +1,88 @@
+name: Authentication failure report
+description: The NTLM handshake or _api authorization failed (exit 3, or a non-JSON sign-in page). These are the most valuable reports right now.
+labels: [auth]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        v0.1.x does **NTLM with explicit credentials only** — no Kerberos-only
+        endpoints, no AD FS / WS-Federation, no Forms-Based Auth. First check
+        [docs/TROUBLESHOOTING.md § Exit 3](https://github.com/a-kazemi/sp-permission-analyzer/blob/main/docs/TROUBLESHOOTING.md#exit-3--authentication);
+        it covers clock skew, Extended Protection / channel binding, multi-WFE
+        affinity, and reverse proxies. If none of it fits, this report is exactly
+        what helps most. **Never paste credentials or tokens.**
+  - type: textarea
+    id: error-line
+    attributes:
+      label: Exact error line(s)
+      description: The `error:` line and the dim hint line beneath it, verbatim.
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: sp-build
+    attributes:
+      label: SharePoint build number
+      description: Central Administration → Servers in Farm (e.g. 16.0.10417.20027).
+    validations:
+      required: true
+  - type: dropdown
+    id: auth-mode
+    attributes:
+      label: Web application authentication
+      options:
+        - NTLM
+        - Kerberos
+        - "Negotiate (Kerberos + NTLM)"
+        - AD FS / WS-Federation
+        - Forms-Based Auth
+        - Not sure
+    validations:
+      required: true
+  - type: dropdown
+    id: scheme
+    attributes:
+      label: Does it also fail over plain HTTP?
+      description: If HTTPS fails with "401 after handshake" but HTTP works, it is usually Extended Protection / channel binding.
+      options:
+        - "Only tried HTTPS"
+        - "HTTP works, HTTPS fails"
+        - "Both fail the same way"
+        - "HTTP not available"
+    validations:
+      required: true
+  - type: dropdown
+    id: topology
+    attributes:
+      label: Front-end topology
+      options:
+        - Single WFE
+        - "Load-balanced WFEs, affinity on"
+        - "Load-balanced WFEs, affinity off / unknown"
+        - Reverse proxy / WAF in front (e.g. F5 APM, NetScaler, nginx)
+    validations:
+      required: true
+  - type: dropdown
+    id: browser-check
+    attributes:
+      label: Does `<site>/_api/web` return JSON in a browser with the same account?
+      options:
+        - "Yes — JSON"
+        - "No — redirects to a sign-in page"
+        - "No — other error"
+        - Haven't checked
+    validations:
+      required: true
+  - type: textarea
+    id: www-authenticate
+    attributes:
+      label: WWW-Authenticate header on the 401 (if known)
+      description: "From a browser devtools / curl -I against `<site>/_api/web`. Optional but very useful."
+      render: shell
+  - type: input
+    id: install
+    attributes:
+      label: Node version and install method
+      placeholder: "node --version; npm link / npm i -g github:... / clone"
+    validations:
+      required: true
