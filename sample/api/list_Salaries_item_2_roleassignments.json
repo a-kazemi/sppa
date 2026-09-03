@@ -1,0 +1,18 @@
+{
+  "value": [
+    {
+      "PrincipalId": 8,
+      "Member": {
+        "Id": 8,
+        "Title": "Jane Doe",
+        "LoginName": "i:0#.w|contoso\\jane",
+        "PrincipalType": 1
+      },
+      "RoleDefinitionBindings": [
+        {
+          "Name": "Read"
+        }
+      ]
+    }
+  ]
+}

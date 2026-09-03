@@ -1,0 +1,19 @@
+{
+  "value": [
+    {
+      "Id": 1,
+      "HasUniqueRoleAssignments": false,
+      "FileRef": "/sites/hr/Documents/Employee Handbook.pdf"
+    },
+    {
+      "Id": 2,
+      "HasUniqueRoleAssignments": false,
+      "FileRef": "/sites/hr/Documents/Org Chart.pptx"
+    },
+    {
+      "Id": 3,
+      "HasUniqueRoleAssignments": false,
+      "FileRef": "/sites/hr/Documents/Holiday Policy.docx"
+    }
+  ]
+}

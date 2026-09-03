@@ -1,0 +1,63 @@
+{
+  "value": [
+    {
+      "PrincipalId": 4,
+      "Member": {
+        "Id": 4,
+        "Title": "HR Owners",
+        "LoginName": "",
+        "PrincipalType": 8
+      },
+      "RoleDefinitionBindings": [
+        {
+          "Name": "Full Control"
+        }
+      ]
+    },
+    {
+      "PrincipalId": 5,
+      "Member": {
+        "Id": 5,
+        "Title": "HR Members",
+        "LoginName": "",
+        "PrincipalType": 8
+      },
+      "RoleDefinitionBindings": [
+        {
+          "Name": "Read"
+        }
+      ]
+    },
+    {
+      "PrincipalId": 11,
+      "Member": {
+        "Id": 11,
+        "Title": "Everyone",
+        "LoginName": "c:0(.s|true",
+        "PrincipalType": 4
+      },
+      "RoleDefinitionBindings": [
+        {
+          "Name": "Read"
+        },
+        {
+          "Name": "Limited Access"
+        }
+      ]
+    },
+    {
+      "PrincipalId": 14,
+      "Member": {
+        "Id": 14,
+        "Title": "CONTOSO\\HR-Admins",
+        "LoginName": "c:0+.w|s-1-5-21-1587823456-2044876312-3512441802-1150",
+        "PrincipalType": 4
+      },
+      "RoleDefinitionBindings": [
+        {
+          "Name": "Full Control"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "value": [
+    {
+      "PrincipalId": 4,
+      "Member": {
+        "Id": 4,
+        "Title": "HR Owners",
+        "LoginName": "",
+        "PrincipalType": 8
+      },
+      "RoleDefinitionBindings": [
+        {
+          "Name": "Full Control"
+        }
+      ]
+    },
+    {
+      "PrincipalId": 12,
+      "Member": {
+        "Id": 12,
+        "Title": "S-1-5-21-1587823456-2044876312-3512441802-2571",
+        "LoginName": "i:0#.w|s-1-5-21-1587823456-2044876312-3512441802-2571",
+        "PrincipalType": 1
+      },
+      "RoleDefinitionBindings": [
+        {
+          "Name": "Contribute"
+        }
+      ]
+    },
+    {
+      "PrincipalId": 15,
+      "Member": {
+        "Id": 15,
+        "Title": "CONTOSO\\Payroll",
+        "LoginName": "c:0+.w|s-1-5-21-1587823456-2044876312-3512441802-1180",
+        "PrincipalType": 4
+      },
+      "RoleDefinitionBindings": [
+        {
+          "Name": "Contribute"
+        }
+      ]
+    }
+  ]
+}

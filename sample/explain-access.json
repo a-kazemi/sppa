@@ -1,0 +1,78 @@
+{
+  "tool": "sp-permission-analyzer",
+  "schemaVersion": 1,
+  "command": "explain-access",
+  "generatedAt": "1970-01-01T00:00:00.000Z",
+  "site": "https://sp.contoso.local/sites/hr",
+  "result": {
+    "user": {
+      "id": 8,
+      "loginName": "i:0#.w|contoso\\jane",
+      "title": "Jane Doe",
+      "type": "User"
+    },
+    "hasAccess": true,
+    "fullControl": false,
+    "effectivePermissions": [
+      "ViewListItems",
+      "OpenItems",
+      "Open",
+      "ViewPages",
+      "BrowseUserInfo",
+      "UseRemoteAPIs"
+    ],
+    "siteCollectionAdmin": false,
+    "brokenInheritanceAt": [
+      {
+        "kind": "web",
+        "title": "Human Resources"
+      }
+    ],
+    "grantPaths": [
+      {
+        "channel": "sharepoint-group",
+        "scopeTitle": "Human Resources",
+        "scopeKind": "web",
+        "via": "HR Members",
+        "roles": [
+          "Read"
+        ],
+        "certain": true
+      },
+      {
+        "channel": "broad-audience",
+        "scopeTitle": "Human Resources",
+        "scopeKind": "web",
+        "via": "Everyone",
+        "roles": [
+          "Read"
+        ],
+        "certain": true,
+        "note": "Grants to a very broad audience — every matching user is included."
+      },
+      {
+        "channel": "ad-group-unresolved",
+        "scopeTitle": "Human Resources",
+        "scopeKind": "web",
+        "via": "CONTOSO\\HR-Admins",
+        "roles": [
+          "Full Control"
+        ],
+        "certain": false,
+        "note": "AD security group — REST cannot expand its membership. The effective-permission result already accounts for it."
+      }
+    ],
+    "unresolvedGroups": [
+      {
+        "name": "CONTOSO\\HR-Admins",
+        "scopeTitle": "Human Resources",
+        "roles": [
+          "Full Control"
+        ]
+      }
+    ],
+    "notes": [
+      "1 AD security group(s) on this scope could not be expanded via REST. The effective-permission check above is still authoritative."
+    ]
+  }
+}

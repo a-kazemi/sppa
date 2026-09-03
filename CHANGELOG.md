@@ -4,6 +4,17 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `sample/` — a synthetic SharePoint Server 2019 site collection: recorded `_api`
+  fixtures plus the exact `scan-site` / `explain-access` output produced from
+  them, covering every finding type. `test/sample.test.ts` drives the real
+  parse → analyse → render pipeline against it (no live farm, no production code
+  change) and fails if the committed output drifts. Regression harness for the
+  pre-mortem's `_api`-shape risk (F4); the NTLM handshake still needs a real farm.
+
 ## [0.1.0] — 2026-09-03
 
 Initial public release.

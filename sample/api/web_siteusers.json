@@ -1,0 +1,36 @@
+{
+  "value": [
+    {
+      "Id": 8,
+      "LoginName": "i:0#.w|contoso\\jane",
+      "Title": "Jane Doe",
+      "Email": "jane.doe@contoso.local",
+      "PrincipalType": 1,
+      "IsSiteAdmin": false
+    },
+    {
+      "Id": 9,
+      "LoginName": "i:0#.w|contoso\\mark",
+      "Title": "Mark Adams",
+      "Email": "mark.adams@contoso.local",
+      "PrincipalType": 1,
+      "IsSiteAdmin": true
+    },
+    {
+      "Id": 12,
+      "LoginName": "i:0#.w|s-1-5-21-1587823456-2044876312-3512441802-2571",
+      "Title": "S-1-5-21-1587823456-2044876312-3512441802-2571",
+      "Email": "",
+      "PrincipalType": 1,
+      "IsSiteAdmin": false
+    },
+    {
+      "Id": 14,
+      "LoginName": "c:0+.w|s-1-5-21-1587823456-2044876312-3512441802-1150",
+      "Title": "CONTOSO\\HR-Admins",
+      "Email": "",
+      "PrincipalType": 4,
+      "IsSiteAdmin": false
+    }
+  ]
+}

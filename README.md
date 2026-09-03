@@ -108,6 +108,16 @@ spperm scan-site --site https://sharepoint/sites/hr --format json > hr-audit.jso
 items with unique permissions. Use `--max-items` to bound very large libraries
 and `--large-group-threshold` to tune the oversized-group flag.
 
+## Worked example
+
+Not ready to point it at a real farm yet? [`sample/`](sample/) contains a
+synthetic SharePoint Server 2019 site collection — recorded `_api` responses plus
+the exact `scan-site` and `explain-access` output the tool produces from them,
+showing every finding (broken inheritance at web/list/item, an orphaned SID, an
+`Everyone` grant, an unexpandable AD group, an oversized group, a site collection
+admin). A test regenerates it from the fixtures on every run, so it never drifts
+from the code.
+
 ## JSON output
 
 Both commands accept `--format json` and emit a stable envelope
@@ -174,6 +184,9 @@ npm test          # builds, then runs the node:test suite
 The permission-analysis logic (`src/analysis/`) and the NTLM handshake
 (`src/auth/`) are pure functions unit-tested against recorded REST fixtures and
 the [MS-NLMP] test vectors — no live farm needed to hack on them.
+`test/sample.test.ts` runs the whole `_api` → parse → analyse → render pipeline
+against the synthetic farm in [`sample/`](sample/) and fails if the committed
+output there goes stale.
 
 ## License
 

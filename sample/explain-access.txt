@@ -1,0 +1,30 @@
+SharePoint access explanation
+Site: https://sp.contoso.local/sites/hr
+User: Jane Doe (User, id 8)
+Login: i:0#.w|contoso\jane
+
+Verdict: HAS ACCESS
+
+Effective permissions on this scope:
+  • View list items / documents
+  • Open documents
+  • Open the site
+  • View pages
+  • Browse user information
+  • Use remote APIs
+
+Inheritance is broken at:
+  • web: Human Resources
+
+How access is granted:
+  ✓ SharePoint group "HR Members" — Read @ web "Human Resources"
+  ✓ Broad audience: Everyone — Read @ web "Human Resources"
+      Grants to a very broad audience — every matching user is included.
+  ? AD security group "CONTOSO\HR-Admins" (membership not verifiable via REST) — Full Control @ web "Human Resources"
+      AD security group — REST cannot expand its membership. The effective-permission result already accounts for it.
+
+AD security groups on the ACL (not expanded):
+  • CONTOSO\HR-Admins — Full Control @ Human Resources
+
+Notes:
+  • 1 AD security group(s) on this scope could not be expanded via REST. The effective-permission check above is still authoritative.

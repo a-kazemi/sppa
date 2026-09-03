@@ -1,0 +1,36 @@
+{
+  "value": [
+    {
+      "Id": "7b2b0a1e-0001-4a10-9a11-000000000001",
+      "Title": "Documents",
+      "HasUniqueRoleAssignments": false,
+      "BaseTemplate": 101,
+      "ItemCount": 3,
+      "Hidden": false
+    },
+    {
+      "Id": "7b2b0a1e-0002-4a10-9a11-000000000002",
+      "Title": "Salaries",
+      "HasUniqueRoleAssignments": true,
+      "BaseTemplate": 100,
+      "ItemCount": 3,
+      "Hidden": false
+    },
+    {
+      "Id": "7b2b0a1e-0003-4a10-9a11-000000000003",
+      "Title": "Onboarding",
+      "HasUniqueRoleAssignments": false,
+      "BaseTemplate": 106,
+      "ItemCount": 5,
+      "Hidden": false
+    },
+    {
+      "Id": "7b2b0a1e-0004-4a10-9a11-000000000004",
+      "Title": "Workflow History",
+      "HasUniqueRoleAssignments": false,
+      "BaseTemplate": 140,
+      "ItemCount": 812,
+      "Hidden": true
+    }
+  ]
+}

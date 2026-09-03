@@ -1,0 +1,29 @@
+{
+  "value": [
+    {
+      "Id": 1,
+      "HasUniqueRoleAssignments": false,
+      "FileRef": "/sites/hr/Lists/Onboarding/1_.000"
+    },
+    {
+      "Id": 2,
+      "HasUniqueRoleAssignments": false,
+      "FileRef": "/sites/hr/Lists/Onboarding/2_.000"
+    },
+    {
+      "Id": 3,
+      "HasUniqueRoleAssignments": false,
+      "FileRef": "/sites/hr/Lists/Onboarding/3_.000"
+    },
+    {
+      "Id": 4,
+      "HasUniqueRoleAssignments": false,
+      "FileRef": "/sites/hr/Lists/Onboarding/4_.000"
+    },
+    {
+      "Id": 5,
+      "HasUniqueRoleAssignments": false,
+      "FileRef": "/sites/hr/Lists/Onboarding/5_.000"
+    }
+  ]
+}

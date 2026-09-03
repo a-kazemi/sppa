@@ -1,0 +1,19 @@
+{
+  "value": [
+    {
+      "Id": 1,
+      "HasUniqueRoleAssignments": false,
+      "FileRef": "/sites/hr/Salaries/2023 Salaries.xlsx"
+    },
+    {
+      "Id": 2,
+      "HasUniqueRoleAssignments": true,
+      "FileRef": "/sites/hr/Salaries/2024 Executive Compensation.xlsx"
+    },
+    {
+      "Id": 3,
+      "HasUniqueRoleAssignments": false,
+      "FileRef": "/sites/hr/Salaries/2024 Standard Salaries.xlsx"
+    }
+  ]
+}

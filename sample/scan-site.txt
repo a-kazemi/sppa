@@ -1,0 +1,31 @@
+SharePoint permission scan
+Site: Human Resources  https://sp.contoso.local/sites/hr
+
+Summary
+  • Lists scanned: 3
+  • Lists with unique permissions: 1
+  • Items with unique permissions: 1
+  • Orphaned principals: 1
+  • Broad-audience grants: 1
+  • Oversized groups: 1
+  • Site collection administrators: 1
+
+Broken inheritance (3)
+  • web Human Resources — 4 assignment(s): HR Owners, HR Members, Everyone, CONTOSO\HR-Admins
+  • list Salaries — 3 assignment(s): HR Owners, S-1-5-21-1587823456-2044876312-3512441802-2571, CONTOSO\Payroll
+  • item /sites/hr/Salaries/2024 Executive Compensation.xlsx — 1 assignment(s): Jane Doe
+
+Orphaned principals (1)
+  • [high] S-1-5-21-1587823456-2044876312-3512441802-2571 — Display name is an unresolved SID identical to the login SID.
+      on ACL: Salaries
+
+Broad-audience grants (1)
+  • Everyone @ Human Resources — Read
+
+Oversized groups (1)
+  • All HR Staff — 112 members (owner: HR Service Account)
+
+Site collection administrators (1)
+  • Mark Adams i:0#.w|contoso\mark
+
+Read-only scan. No data left this machine.
