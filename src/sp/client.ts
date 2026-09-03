@@ -109,7 +109,7 @@ export class SharePointClient {
     }));
   }
 
-  /** One list by title, or null when it does not exist (404). */
+  /** One list by exact title, or null when it does not exist (404). */
   async getListByTitle(listTitle: string): Promise<ListInfo | null> {
     const encList = encodeURIComponent(listTitle.replace(/'/g, "''"));
     try {
@@ -128,6 +128,21 @@ export class SharePointClient {
       if (err instanceof ApiError && /Not found/.test(err.message)) return null;
       throw err;
     }
+  }
+
+  /**
+   * Resolve a list by title tolerating the wrong case. `getByTitle` is
+   * case-sensitive on the server, so try it first (one cheap request, the common
+   * path), then fall back to a single list enumeration and a case-insensitive
+   * match. Returns the list with its canonical title, or null if there is no
+   * such list. Callers should use the returned `.title` for any further calls.
+   */
+  async resolveList(listTitle: string): Promise<ListInfo | null> {
+    const exact = await this.getListByTitle(listTitle);
+    if (exact) return exact;
+    const wanted = listTitle.trim().toLowerCase();
+    const all = await this.getLists(true);
+    return all.find((l) => l.title.toLowerCase() === wanted) ?? null;
   }
 
   async getWeb(): Promise<WebInfo> {

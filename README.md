@@ -53,11 +53,29 @@ Provide the auditing account through environment variables — never on the comm
 line, where it would show up in the process list:
 
 ```bash
+# macOS / Linux (bash, zsh)
 export SPPA_USERNAME='CONTOSO\svc_audit'
 export SPPA_PASSWORD='...'
 # optional; also parsed from DOMAIN\user above
 export SPPA_DOMAIN='CONTOSO'
 ```
+
+```powershell
+# Windows — PowerShell
+$env:SPPA_USERNAME = 'CONTOSO\svc_audit'
+$env:SPPA_PASSWORD = '...'
+$env:SPPA_DOMAIN   = 'CONTOSO'
+```
+
+```bat
+REM Windows — Command Prompt (cmd.exe); do not quote the values
+set SPPA_USERNAME=CONTOSO\svc_audit
+set SPPA_PASSWORD=...
+set SPPA_DOMAIN=CONTOSO
+```
+
+`export` is Unix-only — on Windows use `set` (cmd.exe) or `$env:` (PowerShell).
+See [docs/AUTH.md](docs/AUTH.md) for details.
 
 A read-only account works for everything except item-level scanning inside lists
 where it lacks access — those items are simply skipped.
@@ -127,6 +145,12 @@ items with unique permissions. Add `--recurse` to walk subwebs too — every
 finding is then tagged with the subweb it came from and the summary reports how
 many webs were scanned. Use `--max-items` to bound very large libraries and
 `--large-group-threshold` to tune the oversized-group flag.
+
+NTLM authenticates one TCP connection, so by default every request is serial.
+On a large site collection, `--concurrency 4` (say) opens four authenticated
+connections and runs the scan several times faster. The client also retries
+farm throttling (`429` / `503`, honouring `Retry-After`) and transient socket
+drops automatically.
 
 ## Worked example
 

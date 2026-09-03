@@ -204,6 +204,95 @@ test('retries a transient ECONNRESET then succeeds', async () => {
   }
 });
 
+test('concurrency: 1 (default) serialises requests', async () => {
+  let active = 0;
+  let peak = 0;
+  const fx = await serve((_req, res) => {
+    active++;
+    peak = Math.max(peak, active);
+    setTimeout(() => {
+      active--;
+      res.end('ok');
+    }, 15);
+  });
+
+  const client = new NtlmHttpClient({ credentials: CREDS });
+  try {
+    await Promise.all(
+      Array.from({ length: 4 }, () => client.request({ method: 'GET', url: fx.url })),
+    );
+    assert.equal(peak, 1, 'one request in flight at a time');
+  } finally {
+    client.destroy();
+    await fx.close();
+  }
+});
+
+test('concurrency: N runs up to N requests in parallel', async () => {
+  let active = 0;
+  let peak = 0;
+  const fx = await serve((_req, res) => {
+    active++;
+    peak = Math.max(peak, active);
+    setTimeout(() => {
+      active--;
+      res.end('ok');
+    }, 15);
+  });
+
+  const client = new NtlmHttpClient({ credentials: CREDS, concurrency: 3 });
+  try {
+    await Promise.all(
+      Array.from({ length: 6 }, () => client.request({ method: 'GET', url: fx.url })),
+    );
+    assert.equal(peak, 3, 'at most `concurrency` requests in flight');
+  } finally {
+    client.destroy();
+    await fx.close();
+  }
+});
+
+test('concurrency: each lane runs its own handshake, legs stay on its socket', async () => {
+  const perConn = new Map<import('node:net').Socket, string[]>();
+  const fx = await serve((req, res) => {
+    const seq = perConn.get(req.socket) ?? [];
+    const kind = ntlmMessageType(req.headers.authorization);
+    seq.push(req.headers.authorization === undefined ? 'none' : `type${kind}`);
+    perConn.set(req.socket, seq);
+
+    if (req.headers.authorization === undefined) {
+      res.setHeader('WWW-Authenticate', 'NTLM');
+      res.statusCode = 401;
+      res.end('negotiate');
+    } else if (kind === 1) {
+      res.setHeader('WWW-Authenticate', `NTLM ${fakeType2Base64()}`);
+      res.statusCode = 401;
+      res.end('challenge');
+    } else {
+      res.statusCode = 200;
+      res.end('{"ok":true}');
+    }
+  });
+
+  const client = new NtlmHttpClient({ credentials: CREDS, concurrency: 2 });
+  try {
+    const [a, b] = await Promise.all([
+      client.request({ method: 'GET', url: fx.url }),
+      client.request({ method: 'GET', url: fx.url }),
+    ]);
+    assert.equal(a.status, 200);
+    assert.equal(b.status, 200);
+    assert.equal(fx.connections(), 2, 'two lanes -> two sockets');
+    for (const seq of perConn.values()) {
+      // Each socket saw one coherent handshake, never another request's legs.
+      assert.deepEqual(seq, ['none', 'type1', 'type3']);
+    }
+  } finally {
+    client.destroy();
+    await fx.close();
+  }
+});
+
 test('does not retry a non-transient socket error (ECONNREFUSED)', async () => {
   const fx = await serve((_req, res) => res.end());
   const deadUrl = fx.url;

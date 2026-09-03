@@ -15,18 +15,49 @@ The client:
 4. Sends a Type 3 (AUTHENTICATE) message with an **NTLMv2** response and an
    LMv2 response.
 
-All four legs travel over a single pinned keep-alive socket, because NTLM
-authenticates the TCP connection rather than the individual request.
+All four legs of one request travel over a single pinned keep-alive socket,
+because NTLM authenticates the TCP connection rather than the individual request.
+The socket stays authenticated, so later requests on it skip the handshake.
+`--concurrency <n>` opens `n` such sockets, each with its own handshake, and
+serves one request per socket at a time so legs never interleave; it defaults to
+`1` (fully serial) and is worth raising for `scan-site` on a large site.
+
+On a `429` / `503` the client backs off and retries (honouring `Retry-After`),
+up to 3 times, re-running the handshake on a fresh socket each time. Transient
+socket errors (`ECONNRESET`, `ETIMEDOUT`, …) are retried the same way.
 
 ## Supplying credentials
 
-Preferred — environment variables (not visible in the process list):
+Preferred — environment variables (not visible in the process list). Set them
+in the same shell you run `sppa` from; they last only for that session.
+
+**macOS / Linux (bash, zsh):**
 
 ```bash
 export SPPA_USERNAME='CONTOSO\svc_audit'   # DOMAIN\user, or plain user + --domain
 export SPPA_PASSWORD='...'
 export SPPA_DOMAIN='CONTOSO'               # optional if DOMAIN\user is used
 ```
+
+**Windows — PowerShell:**
+
+```powershell
+$env:SPPA_USERNAME = 'CONTOSO\svc_audit'   # DOMAIN\user, or plain user + --domain
+$env:SPPA_PASSWORD = '...'
+$env:SPPA_DOMAIN   = 'CONTOSO'             # optional if DOMAIN\user is used
+```
+
+**Windows — Command Prompt (cmd.exe):**
+
+```bat
+set SPPA_USERNAME=CONTOSO\svc_audit
+set SPPA_PASSWORD=...
+set SPPA_DOMAIN=CONTOSO
+```
+
+Note for cmd.exe: do **not** quote the values — `set X='y'` makes the quotes
+part of the value. `export` is a Unix command and does not exist in cmd.exe or
+PowerShell.
 
 Fallback — flags (`--username`, `--password`, `--domain`). Using `--password`
 prints a warning; avoid it on shared hosts.
@@ -71,7 +102,18 @@ sppa scan-site --site https://sharepoint/sites/hr --insecure
 A cleaner alternative is to trust your internal CA for Node:
 
 ```bash
+# macOS / Linux
 export NODE_EXTRA_CA_CERTS=/path/to/internal-root-ca.pem
+```
+
+```powershell
+# Windows — PowerShell
+$env:NODE_EXTRA_CA_CERTS = 'C:\path\to\internal-root-ca.pem'
+```
+
+```bat
+REM Windows — Command Prompt
+set NODE_EXTRA_CA_CERTS=C:\path\to\internal-root-ca.pem
 ```
 
 ## Troubleshooting

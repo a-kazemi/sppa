@@ -110,6 +110,7 @@ ${color.bold('COMMON OPTIONS')}
   --format table|json     Output format (default: table)
   --insecure              Do not verify TLS certificates (self-signed farms)
   --timeout <ms>          Per-request timeout (default: 30000)
+  --concurrency <n>       Parallel authenticated connections (default: 1)
   --username <user>       Auth account; or set SPPA_USERNAME. Accepts DOMAIN\\user
   --password <pass>       Auth password; prefer SPPA_PASSWORD (env)
   --domain <domain>       NetBIOS domain; or set SPPA_DOMAIN
@@ -130,6 +131,7 @@ ${color.bold('scan-site OPTIONS')}
   --max-items <n>               Max items to scan per list (default: 20000)
   --include-hidden             Include hidden lists
   --recurse                    Walk subwebs (web/webs) and merge their findings
+  --concurrency <n>            Parallel connections; speeds up a large scan (default: 1)
 
 ${color.bold('EXAMPLES')}
   export SPPA_USERNAME='CONTOSO\\svc_audit' SPPA_PASSWORD='***'
@@ -161,6 +163,8 @@ export async function run(argv: string[]): Promise<number> {
   const command = _[0];
   const timeoutFlag = str(flags, 'timeout');
   const timeoutMs = timeoutFlag === undefined ? undefined : int(flags, 'timeout', 30000);
+  const concurrency =
+    str(flags, 'concurrency') === undefined ? undefined : Math.max(1, int(flags, 'concurrency', 1));
 
   switch (command) {
     case 'explain-access': {
@@ -176,6 +180,7 @@ export async function run(argv: string[]): Promise<number> {
         credentials: resolveCredentials(flags),
         insecure: bool(flags, 'insecure'),
         ...(timeoutMs === undefined ? {} : { timeoutMs }),
+        ...(concurrency === undefined ? {} : { concurrency }),
       });
       process.stdout.write(output + '\n');
       return 0;
@@ -190,6 +195,7 @@ export async function run(argv: string[]): Promise<number> {
         credentials: resolveCredentials(flags),
         insecure: bool(flags, 'insecure'),
         ...(timeoutMs === undefined ? {} : { timeoutMs }),
+        ...(concurrency === undefined ? {} : { concurrency }),
       });
       process.stdout.write(output + '\n');
       return 0;
@@ -207,6 +213,7 @@ export async function run(argv: string[]): Promise<number> {
         credentials: resolveCredentials(flags),
         insecure: bool(flags, 'insecure'),
         ...(timeoutMs === undefined ? {} : { timeoutMs }),
+        ...(concurrency === undefined ? {} : { concurrency }),
         onProgress: (m) => process.stderr.write(color.dim(m) + '\n'),
       });
       process.stdout.write(output + '\n');

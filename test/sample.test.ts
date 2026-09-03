@@ -52,6 +52,9 @@ function fixtureFor(url: string): string {
   const listRa = rawPath.match(/^web\/lists\/getByTitle\('(.+)'\)\/roleassignments$/);
   if (listRa) return `list_${listRa[1]}_roleassignments.json`;
 
+  const listByTitle = rawPath.match(/^web\/lists\/getByTitle\('(.+)'\)$/);
+  if (listByTitle) return `list_${listByTitle[1]}.json`;
+
   const userGroups = rawPath.match(/^web\/getUserById\((\d+)\)\/groups$/);
   if (userGroups) return `web_getUserById_${userGroups[1]}_groups.json`;
 
@@ -69,7 +72,16 @@ function fixtureFor(url: string): string {
 class ReplayHttpClient {
   request(opts: { url: string }): Promise<HttpResponse> {
     const file = fixtureFor(opts.url);
-    let body = fs.readFileSync(path.join(API_DIR, file), 'utf8');
+    const full = path.join(API_DIR, file);
+
+    // getByTitle('X') for a list that has no fixture behaves like the real farm:
+    // a 404, which SharePointClient maps to ApiError('Not found …').
+    const barePath = opts.url.split('?')[0]!;
+    if (!fs.existsSync(full) && /\/lists\/getByTitle\('[^']+'\)$/.test(barePath)) {
+      return Promise.resolve({ status: 404, headers: {}, body: Buffer.from('not found', 'utf8') });
+    }
+
+    let body = fs.readFileSync(full, 'utf8');
 
     // Honour the $filter=LoginName eq '...' clause that findUser() relies on.
     const filter = opts.url.match(/\$filter=LoginName eq '([^']*)'/);
@@ -161,14 +173,14 @@ async function runExplainDeny(): Promise<string> {
   const web = await sp.connect();
   const user = await sp.findUser(RLEE);
   assert.ok(user, 'fixture user should resolve');
+  const listMeta = await sp.resolveList(DENY_LIST);
+  assert.ok(listMeta, 'fixture list should resolve');
   const [effectiveMask, userGroupIds, webAssignments] = await Promise.all([
-    sp.getListUserEffectivePermissions(DENY_LIST, user!.loginName),
+    sp.getListUserEffectivePermissions(listMeta!.title, user!.loginName),
     sp.getUserGroupIds(user!.id),
     sp.getWebRoleAssignments(),
   ]);
-  const lists = await sp.getLists(true);
-  const meta = lists.find((l) => l.title.toLowerCase() === DENY_LIST.toLowerCase());
-  const listAssignments = await sp.getListRoleAssignments(DENY_LIST);
+  const listAssignments = await sp.getListRoleAssignments(listMeta!.title);
   const scopePath: ScopeNode[] = [
     {
       kind: 'web',
@@ -179,8 +191,8 @@ async function runExplainDeny(): Promise<string> {
     },
     {
       kind: 'list',
-      title: DENY_LIST,
-      hasUniqueRoleAssignments: meta?.hasUniqueRoleAssignments ?? true,
+      title: listMeta!.title,
+      hasUniqueRoleAssignments: listMeta!.hasUniqueRoleAssignments,
       assignments: listAssignments,
     },
   ];
@@ -302,6 +314,21 @@ test('explain-access --list: contractor is denied on the Salaries list', async (
   assert.equal(out.unresolvedGroups.length, 1);
   assert.equal(out.unresolvedGroups[0].name, 'CONTOSO\\Payroll');
   assert.ok(out.notes.some((n: string) => n.includes('no access to this scope')));
+});
+
+test('resolveList: exact title hits getByTitle; wrong case falls back to enumeration', async () => {
+  const sp = client();
+  const exact = await sp.resolveList('Salaries');
+  assert.equal(exact?.title, 'Salaries');
+  assert.equal(exact?.hasUniqueRoleAssignments, true);
+
+  // "SALARIES" 404s on getByTitle (no fixture), then the enumeration fallback
+  // matches case-insensitively and returns the canonical title.
+  const wrongCase = await sp.resolveList('SALARIES');
+  assert.equal(wrongCase?.title, 'Salaries');
+
+  const missing = await sp.resolveList('No Such List');
+  assert.equal(missing, null);
 });
 
 test('list-access: synthetic farm lists who can reach the HR site', async () => {

@@ -17,6 +17,8 @@ export interface ScanSiteOptions {
   credentials: Credentials;
   insecure?: boolean;
   timeoutMs?: number;
+  /** Parallel authenticated connections (see NtlmHttpClient). Default 1. */
+  concurrency?: number;
   /** Progress callback for the CLI (stderr). */
   onProgress?: (message: string) => void;
 }
@@ -32,6 +34,7 @@ export async function scanSite(opts: ScanSiteOptions): Promise<string> {
     credentials: opts.credentials,
     ...(opts.insecure === undefined ? {} : { insecure: opts.insecure }),
     ...(opts.timeoutMs === undefined ? {} : { timeoutMs: opts.timeoutMs }),
+    ...(opts.concurrency === undefined ? {} : { concurrency: opts.concurrency }),
   });
   const rootSp = new SharePointClient(http, opts.site);
 

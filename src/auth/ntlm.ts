@@ -67,8 +67,12 @@ export function buildType1Message(): Buffer {
   SIGNATURE.copy(buf, 0);
   buf.writeUInt32LE(1, 8); // message type
   buf.writeUInt32LE(TYPE1_FLAGS, 12);
-  // Domain (8 bytes) and Workstation (8 bytes) fields left zeroed — we do not
-  // supply them in the negotiate message.
+  // DomainName (offset 16) and Workstation (offset 24) security-buffer fields.
+  // We supply neither, so Len and MaxLen stay 0, but MS-NLMP 2.2.1.1 still wants
+  // BufferOffset to point just past the fixed portion (40) rather than be 0 —
+  // strict proxies reject a zero offset.
+  buf.writeUInt32LE(40, 20); // DomainName BufferOffset
+  buf.writeUInt32LE(40, 28); // Workstation BufferOffset
   // Version (8 bytes) at offset 32: report a generic Windows build.
   buf[32] = 6; // major
   buf[33] = 1; // minor

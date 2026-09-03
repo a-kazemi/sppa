@@ -13,6 +13,7 @@ export interface ListAccessOptions {
   credentials: Credentials;
   insecure?: boolean;
   timeoutMs?: number;
+  concurrency?: number;
 }
 
 /** Enumerate every principal that has access to a web or list, and how. */
@@ -23,6 +24,7 @@ export async function listAccess(opts: ListAccessOptions): Promise<string> {
     credentials: opts.credentials,
     ...(opts.insecure === undefined ? {} : { insecure: opts.insecure }),
     ...(opts.timeoutMs === undefined ? {} : { timeoutMs: opts.timeoutMs }),
+    ...(opts.concurrency === undefined ? {} : { concurrency: opts.concurrency }),
   });
   const sp = new SharePointClient(http, opts.site);
 
@@ -44,16 +46,16 @@ export async function listAccess(opts: ListAccessOptions): Promise<string> {
     let assignments = webAssignments;
 
     if (opts.list) {
-      const meta = await sp.getListByTitle(opts.list);
+      const meta = await sp.resolveList(opts.list);
       if (!meta) {
         throw new UsageError(
           `List "${opts.list}" was not found on this site.`,
-          'Pass the exact list title (case-sensitive), not the URL segment.',
+          'Pass the list title as it appears in SharePoint (spaces and all), not the URL segment.',
         );
       }
       scope = { kind: 'list', title: meta.title };
       if (meta.hasUniqueRoleAssignments) {
-        assignments = await sp.getListRoleAssignments(opts.list);
+        assignments = await sp.getListRoleAssignments(meta.title);
         governingScopeTitle = meta.title;
       } else {
         inheritedFromParent = true;

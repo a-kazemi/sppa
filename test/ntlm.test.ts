@@ -53,6 +53,11 @@ test('type 1 message is well formed', () => {
   const t1 = buildType1Message();
   assert.equal(t1.subarray(0, 8).toString('latin1'), 'NTLMSSP\0');
   assert.equal(t1.readUInt32LE(8), 1);
+  // DomainName / Workstation security buffers: empty, but offset past the header.
+  assert.equal(t1.readUInt16LE(16), 0, 'DomainName Len = 0');
+  assert.equal(t1.readUInt32LE(20), 40, 'DomainName BufferOffset = 40');
+  assert.equal(t1.readUInt16LE(24), 0, 'Workstation Len = 0');
+  assert.equal(t1.readUInt32LE(28), 40, 'Workstation BufferOffset = 40');
 });
 
 test('parseType2Message round-trips a synthetic challenge', () => {

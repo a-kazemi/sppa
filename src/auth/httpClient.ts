@@ -4,8 +4,11 @@
  * NTLM authenticates the TCP connection, not the individual request, so all
  * three legs of the handshake (negotiate -> challenge -> authenticate) plus the
  * final authenticated request must travel over the same socket. We enforce that
- * with a per-origin Agent limited to a single socket, and by always draining
- * response bodies so the socket returns cleanly to the keep-alive pool.
+ * with "lanes": each lane owns a per-origin Agent capped at a single socket and
+ * serves one `request()` at a time, so a request's legs never interleave with
+ * another's. `concurrency` lanes run in parallel — each does its own handshake
+ * once, then reuses its authenticated socket. Response bodies are always drained
+ * so the socket returns cleanly to the keep-alive pool.
  */
 
 import * as http from 'node:http';
@@ -44,6 +47,12 @@ export interface NtlmHttpClientOptions {
   maxRetryDelayMs?: number;
   /** Sleep implementation — overridable so tests do not wait in real time. */
   sleep?: (ms: number) => Promise<void>;
+  /**
+   * How many authenticated connections to run in parallel. Each is a separate
+   * NTLM handshake. Default 1 (fully serial, the safe choice for a sensitive
+   * farm); raise it to speed up `scan-site` on a large site collection.
+   */
+  concurrency?: number;
 }
 
 const RETRYABLE_CODES = new Set(['ECONNRESET', 'ETIMEDOUT', 'EPIPE', 'ECONNABORTED', 'EAI_AGAIN']);
@@ -55,6 +64,13 @@ interface RawRequestOptions {
   body?: Buffer;
 }
 
+/** One serialised authenticated connection: its own single-socket agents. */
+interface Lane {
+  agents: Map<string, http.Agent | https.Agent>;
+  busy: boolean;
+  waiters: Array<() => void>;
+}
+
 export class NtlmHttpClient {
   private readonly creds: Required<Credentials>;
   private readonly insecure: boolean;
@@ -63,7 +79,7 @@ export class NtlmHttpClient {
   private readonly retryBaseMs: number;
   private readonly maxRetryDelayMs: number;
   private readonly sleep: (ms: number) => Promise<void>;
-  private readonly agents = new Map<string, http.Agent | https.Agent>();
+  private readonly lanes: Lane[];
 
   constructor(opts: NtlmHttpClientOptions) {
     this.creds = {
@@ -78,26 +94,49 @@ export class NtlmHttpClient {
     this.retryBaseMs = Math.max(0, opts.retryBaseMs ?? 500);
     this.maxRetryDelayMs = Math.max(0, opts.maxRetryDelayMs ?? 60000);
     this.sleep = opts.sleep ?? ((ms) => new Promise((r) => setTimeout(r, ms)));
+    const poolSize = Math.max(1, Math.floor(opts.concurrency ?? 1));
+    this.lanes = Array.from({ length: poolSize }, () => ({
+      agents: new Map<string, http.Agent | https.Agent>(),
+      busy: false,
+      waiters: [] as Array<() => void>,
+    }));
   }
 
-  private agentFor(u: URL): http.Agent | https.Agent {
+  /** Take a free lane, or wait for one to be released. */
+  private acquireLane(): Promise<Lane> {
+    const free = this.lanes.find((l) => !l.busy);
+    if (free) {
+      free.busy = true;
+      return Promise.resolve(free);
+    }
+    const lane = this.lanes.reduce((a, b) => (b.waiters.length < a.waiters.length ? b : a));
+    return new Promise<Lane>((resolve) => lane.waiters.push(() => resolve(lane)));
+  }
+
+  private releaseLane(lane: Lane): void {
+    const next = lane.waiters.shift();
+    if (next) next();
+    else lane.busy = false;
+  }
+
+  private agentFor(lane: Lane, u: URL): http.Agent | https.Agent {
     const key = `${u.protocol}//${u.host}`;
-    let agent = this.agents.get(key);
+    let agent = lane.agents.get(key);
     if (!agent) {
       const common = { keepAlive: true, maxSockets: 1, maxFreeSockets: 1 };
       agent =
         u.protocol === 'https:'
           ? new https.Agent({ ...common, rejectUnauthorized: !this.insecure })
           : new http.Agent(common);
-      this.agents.set(key, agent);
+      lane.agents.set(key, agent);
     }
     return agent;
   }
 
-  private rawRequest(opts: RawRequestOptions): Promise<HttpResponse> {
+  private rawRequest(lane: Lane, opts: RawRequestOptions): Promise<HttpResponse> {
     const u = new URL(opts.url);
     const transport = u.protocol === 'https:' ? https : http;
-    const agent = this.agentFor(u);
+    const agent = this.agentFor(lane, u);
 
     return new Promise<HttpResponse>((resolve, reject) => {
       const req = transport.request(
@@ -146,9 +185,18 @@ export class NtlmHttpClient {
    * socket, a fresh negotiate.
    */
   async request(opts: RawRequestOptions): Promise<HttpResponse> {
+    const lane = await this.acquireLane();
+    try {
+      return await this.requestOnLane(lane, opts);
+    } finally {
+      this.releaseLane(lane);
+    }
+  }
+
+  private async requestOnLane(lane: Lane, opts: RawRequestOptions): Promise<HttpResponse> {
     for (let attempt = 0; ; attempt++) {
       try {
-        const res = await this.attempt(opts);
+        const res = await this.attempt(lane, opts);
         if ((res.status === 429 || res.status === 503) && attempt < this.retries) {
           await this.sleep(this.retryDelay(res.headers['retry-after'], attempt));
           continue;
@@ -179,8 +227,8 @@ export class NtlmHttpClient {
   }
 
   /** One full attempt: raw request, plus the NTLM handshake if challenged. */
-  private async attempt(opts: RawRequestOptions): Promise<HttpResponse> {
-    const first = await this.rawRequest(opts);
+  private async attempt(lane: Lane, opts: RawRequestOptions): Promise<HttpResponse> {
+    const first = await this.rawRequest(lane, opts);
     if (first.status !== 401) return first;
 
     const offered = String(first.headers['www-authenticate'] ?? '');
@@ -197,7 +245,7 @@ export class NtlmHttpClient {
     }
 
     const type1 = buildType1Message().toString('base64');
-    const challenge = await this.rawRequest({
+    const challenge = await this.rawRequest(lane, {
       ...opts,
       headers: { ...(opts.headers ?? {}), Authorization: `NTLM ${type1}` },
     });
@@ -219,7 +267,7 @@ export class NtlmHttpClient {
       workstation: this.creds.workstation,
     }).message.toString('base64');
 
-    const authed = await this.rawRequest({
+    const authed = await this.rawRequest(lane, {
       ...opts,
       headers: { ...(opts.headers ?? {}), Authorization: `NTLM ${type3}` },
     });
@@ -234,8 +282,10 @@ export class NtlmHttpClient {
   }
 
   destroy(): void {
-    for (const agent of this.agents.values()) agent.destroy();
-    this.agents.clear();
+    for (const lane of this.lanes) {
+      for (const agent of lane.agents.values()) agent.destroy();
+      lane.agents.clear();
+    }
   }
 }
 

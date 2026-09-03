@@ -8,6 +8,10 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- `--concurrency <n>` — run `n` authenticated connections in parallel, each its
+  own NTLM handshake, one request per connection at a time so a request's
+  handshake legs never interleave with another's. Defaults to `1` (unchanged
+  serial behaviour); raising it speeds up `scan-site` on a large site collection.
 - Automatic retry in the HTTP layer for server throttling (`429` / `503`,
   honouring `Retry-After` — delta-seconds or HTTP-date) and transient socket
   errors (`ECONNRESET` / `ETIMEDOUT` / `EPIPE` / …). Full-jitter exponential
@@ -25,6 +29,20 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   standard envelope (`command: "list-access"`). Pure logic in
   `src/analysis/listAccess.ts`, covered by `test/listAccess.test.ts` and a
   `sample/list-access.{json,txt}` worked example pinned by `test/sample.test.ts`.
+
+### Changed
+
+- `explain-access --list` / `list-access --list` now resolve the list with one
+  targeted `getByTitle` request instead of enumerating every list on the site,
+  and fall back to a case-insensitive match (then use the canonical title) when
+  the title's case does not match — previously a wrong-case `--list` produced a
+  confusing `404` from the server. New `SharePointClient.resolveList()`.
+
+### Fixed
+
+- NTLM Type 1 message: the (empty) DomainName / Workstation security buffers now
+  carry `BufferOffset = 40` per MS-NLMP 2.2.1.1 instead of a zero offset, which
+  some strict reverse proxies reject.
 - `scan-site --recurse` — walk subwebs (`web/webs`) breadth-first (bounded at 500
   webs) and merge every web's findings into one report. Each finding carries an
   optional `web` field (server-relative URL) so you can see which subweb it came

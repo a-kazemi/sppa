@@ -14,6 +14,7 @@ export interface ExplainAccessOptions {
   credentials: Credentials;
   insecure?: boolean;
   timeoutMs?: number;
+  concurrency?: number;
 }
 
 /** i:0#.w| is the standard Windows-claims encoding prefix on classic farms. */
@@ -31,6 +32,7 @@ export async function explainAccess(opts: ExplainAccessOptions): Promise<string>
     credentials: opts.credentials,
     ...(opts.insecure === undefined ? {} : { insecure: opts.insecure }),
     ...(opts.timeoutMs === undefined ? {} : { timeoutMs: opts.timeoutMs }),
+    ...(opts.concurrency === undefined ? {} : { concurrency: opts.concurrency }),
   });
   const sp = new SharePointClient(http, opts.site);
 
@@ -50,9 +52,19 @@ export async function explainAccess(opts: ExplainAccessOptions): Promise<string>
       );
     }
 
+    // Resolve the list up front (tolerating the wrong case) so every subsequent
+    // call uses its canonical title, not the user's spelling.
+    const listMeta = opts.list ? await sp.resolveList(opts.list) : null;
+    if (opts.list && !listMeta) {
+      throw new UsageError(
+        `List "${opts.list}" was not found on this site.`,
+        'Pass the list title as it appears in SharePoint (spaces and all), not the URL segment.',
+      );
+    }
+
     const [effectiveMask, userGroupIds, webAssignments] = await Promise.all([
-      opts.list
-        ? sp.getListUserEffectivePermissions(opts.list, user.loginName)
+      listMeta
+        ? sp.getListUserEffectivePermissions(listMeta.title, user.loginName)
         : sp.getUserEffectivePermissions(user.loginName),
       sp.getUserGroupIds(user.id),
       sp.getWebRoleAssignments(),
@@ -68,14 +80,12 @@ export async function explainAccess(opts: ExplainAccessOptions): Promise<string>
       },
     ];
 
-    if (opts.list) {
-      const lists = await sp.getLists(true);
-      const meta = lists.find((l) => l.title.toLowerCase() === opts.list!.toLowerCase());
-      const listAssignments = await sp.getListRoleAssignments(opts.list);
+    if (listMeta) {
+      const listAssignments = await sp.getListRoleAssignments(listMeta.title);
       path.push({
         kind: 'list',
-        title: opts.list,
-        hasUniqueRoleAssignments: meta?.hasUniqueRoleAssignments ?? true,
+        title: listMeta.title,
+        hasUniqueRoleAssignments: listMeta.hasUniqueRoleAssignments,
         assignments: listAssignments,
       });
     }
