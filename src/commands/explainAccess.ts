@@ -46,7 +46,7 @@ export async function explainAccess(opts: ExplainAccessOptions): Promise<string>
       throw new UsageError(
         `User "${opts.targetUser}" was not found among this site's users.`,
         'Pass the exact login name. For classic Windows-claims farms try --windows-claims, ' +
-          'or pass the full claim, e.g. "i:0#.w|CONTOSO\\jdoe".',
+          'or pass the full claim, e.g. "i:0#.w|CONTOSO\\a.kazemi".',
       );
     }
 

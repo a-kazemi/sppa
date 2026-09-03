@@ -117,7 +117,7 @@ ${color.bold('COMMON OPTIONS')}
   -v, --version           Show version
 
 ${color.bold('explain-access OPTIONS')}
-  --user <login>          Login to analyse, e.g. "CONTOSO\\jdoe" (required)
+  --user <login>          Login to analyse, e.g. "CONTOSO\\a.kazemi" (required)
   --list <title>          Analyse a specific list instead of the web
   --windows-claims        Auto-prefix the login with i:0#.w| for classic farms
 
@@ -133,7 +133,7 @@ ${color.bold('scan-site OPTIONS')}
 
 ${color.bold('EXAMPLES')}
   export SPPA_USERNAME='CONTOSO\\svc_audit' SPPA_PASSWORD='***'
-  sppa explain-access --site https://sp/sites/hr --user 'CONTOSO\\jdoe'
+  sppa explain-access --site https://sp/sites/hr --user 'CONTOSO\\a.kazemi'
   sppa list-access --site https://sp/sites/hr --list 'Salary Review'
   sppa scan-site --site https://sp/sites/hr --recurse --format json > hr-audit.json
 

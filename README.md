@@ -67,14 +67,14 @@ where it lacks access — those items are simply skipped.
 ### Explain why a user has access
 
 ```bash
-sppa explain-access --site https://sharepoint/sites/hr --user 'CONTOSO\jdoe'
+sppa explain-access --site https://sharepoint/sites/hr --user 'CONTOSO\a.kazemi'
 ```
 
 ```
 SharePoint access explanation
 Site: https://sharepoint/sites/hr
 User: Jane Doe (User, id 14)
-Login: i:0#.w|contoso\jdoe
+Login: i:0#.w|contoso\a.kazemi
 
 Verdict: HAS ACCESS
 
@@ -99,7 +99,7 @@ Scope it to a single list, or handle classic Windows-claims logins:
 
 ```bash
 sppa explain-access --site https://sharepoint/sites/hr \
-  --user 'CONTOSO\jdoe' --list 'Salary Review' --windows-claims
+  --user 'CONTOSO\a.kazemi' --list 'Salary Review' --windows-claims
 ```
 
 ### List who has access

@@ -25,9 +25,9 @@ function principal(p: Partial<Principal>): Principal {
 
 test('looksLikeSid / sidFromLogin', () => {
   assert.ok(looksLikeSid(SID));
-  assert.ok(!looksLikeSid('CONTOSO\\jdoe'));
+  assert.ok(!looksLikeSid('CONTOSO\\a.kazemi'));
   assert.equal(sidFromLogin(`i:0#.w|contoso\\${SID}`), SID);
-  assert.equal(sidFromLogin('i:0#.w|contoso\\jdoe'), null);
+  assert.equal(sidFromLogin('i:0#.w|contoso\\a.kazemi'), null);
 });
 
 test('classifyOrphan flags unresolved SID accounts', () => {
@@ -44,7 +44,7 @@ test('classifyOrphan flags unresolved SID accounts', () => {
 
 test('classifyOrphan ignores healthy users and SharePoint groups', () => {
   assert.equal(
-    classifyOrphan(principal({ title: 'Jane Doe', email: 'jane@contoso.com', loginName: 'i:0#.w|contoso\\jdoe' })),
+    classifyOrphan(principal({ title: 'Jane Doe', email: 'jane@contoso.com', loginName: 'i:0#.w|contoso\\a.kazemi' })),
     null,
   );
   assert.equal(
@@ -57,5 +57,5 @@ test('broadAudienceLabel recognises wide claims', () => {
   assert.equal(broadAudienceLabel('c:0(.s|true'), 'Everyone');
   assert.equal(broadAudienceLabel('c:0!.s|windows'), 'All authenticated Windows users');
   assert.equal(broadAudienceLabel('NT AUTHORITY\\authenticated users'), 'All authenticated Windows users');
-  assert.equal(broadAudienceLabel('i:0#.w|contoso\\jdoe'), null);
+  assert.equal(broadAudienceLabel('i:0#.w|contoso\\a.kazemi'), null);
 });
