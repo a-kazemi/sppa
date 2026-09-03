@@ -66,6 +66,18 @@ function format(flags: Map<string, string | boolean>): 'table' | 'json' {
   return v;
 }
 
+/** `./sppa-scan-<host>-<YYYYMMDD-HHMMSS>.html` in the current directory. */
+function defaultReportPath(site: string): string {
+  let host = 'site';
+  try {
+    host = new URL(site).host.replace(/[^a-z0-9.-]/gi, '_') || 'site';
+  } catch {
+    /* keep fallback */
+  }
+  const ts = new Date().toISOString().replace(/[-:]/g, '').replace('T', '-').slice(0, 15);
+  return `sppa-scan-${host}-${ts}.html`;
+}
+
 function resolveCredentials(flags: Map<string, string | boolean>): Credentials {
   let username = str(flags, 'username') ?? process.env['SPPA_USERNAME'] ?? '';
   let domain = str(flags, 'domain') ?? process.env['SPPA_DOMAIN'] ?? '';
@@ -132,6 +144,8 @@ ${color.bold('scan-site OPTIONS')}
   --include-hidden             Include hidden lists
   --recurse                    Walk subwebs (web/webs) and merge their findings
   --concurrency <n>            Parallel connections; speeds up a large scan (default: 1)
+  --report <path>              HTML report path (default: ./sppa-scan-<host>-<time>.html)
+  --no-report                  Do not write the HTML report
 
 ${color.bold('EXAMPLES')}
   export SPPA_USERNAME='CONTOSO\\svc_audit' SPPA_PASSWORD='***'
@@ -202,9 +216,14 @@ export async function run(argv: string[]): Promise<number> {
     }
     case 'scan-site': {
       const site = str(flags, 'site') ?? '';
+      const fmt = format(flags);
+      const htmlReportPath =
+        fmt === 'json' || bool(flags, 'no-report')
+          ? undefined
+          : (str(flags, 'report') ?? defaultReportPath(site));
       const output = await scanSite({
         site,
-        format: format(flags),
+        format: fmt,
         largeGroupThreshold: int(flags, 'large-group-threshold', 100),
         skipItems: bool(flags, 'skip-items'),
         maxItems: int(flags, 'max-items', 20000),
@@ -214,6 +233,7 @@ export async function run(argv: string[]): Promise<number> {
         insecure: bool(flags, 'insecure'),
         ...(timeoutMs === undefined ? {} : { timeoutMs }),
         ...(concurrency === undefined ? {} : { concurrency }),
+        ...(htmlReportPath === undefined ? {} : { htmlReportPath }),
         onProgress: (m) => process.stderr.write(color.dim(m) + '\n'),
       });
       process.stdout.write(output + '\n');

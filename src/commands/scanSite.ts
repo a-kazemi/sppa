@@ -1,8 +1,13 @@
+import { writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { NtlmHttpClient, Credentials } from '../auth/httpClient';
 import { SharePointClient, WebInfo } from '../sp/client';
 import { analyzeScan, mergeScanReports, ScanInput, ScanReport } from '../analysis/scanSite';
 import { renderScanReport } from '../report/table';
+import { renderScanHtml } from '../report/html';
 import { renderJson, toJsonEnvelope } from '../report/json';
+import { color } from '../util/ansi';
 import { UsageError } from '../util/errors';
 
 export interface ScanSiteOptions {
@@ -19,6 +24,11 @@ export interface ScanSiteOptions {
   timeoutMs?: number;
   /** Parallel authenticated connections (see NtlmHttpClient). Default 1. */
   concurrency?: number;
+  /**
+   * Write a standalone HTML report to this path and append a link to the
+   * terminal output. Ignored when `format` is `json`. Undefined = no file.
+   */
+  htmlReportPath?: string;
   /** Progress callback for the CLI (stderr). */
   onProgress?: (message: string) => void;
 }
@@ -67,11 +77,24 @@ export async function scanSite(opts: ScanSiteOptions): Promise<string> {
     }
 
     const report = opts.recurse ? mergeScanReports(reports) : reports[0]!;
+    const envelope = toJsonEnvelope('scan-site', opts.site, report);
 
     if (opts.format === 'json') {
-      return renderJson(toJsonEnvelope('scan-site', opts.site, report));
+      return renderJson(envelope);
     }
-    return renderScanReport(report);
+
+    let text = renderScanReport(report);
+    if (opts.htmlReportPath) {
+      const abs = resolve(opts.htmlReportPath);
+      try {
+        writeFileSync(abs, renderScanHtml(envelope), 'utf8');
+        text += '\n' + color.dim('Report: ') + pathToFileURL(abs).href;
+      } catch (err) {
+        const reason = err instanceof Error ? err.message : String(err);
+        progress(`warning: could not write HTML report to ${abs}: ${reason}`);
+      }
+    }
+    return text;
   } finally {
     http.destroy();
   }

@@ -8,6 +8,14 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- `scan-site` writes a standalone HTML report by default — inline CSS, no runtime
+  assets, RTL-aware, prints cleanly to PDF — and appends a `Report:` `file://`
+  link as the last line of the terminal output. Path defaults to
+  `./sppa-scan-<host>-<timestamp>.html`; `--report <path>` overrides it and
+  `--no-report` disables it. Skipped when `--format json` is used. The renderer
+  (`src/report/html.ts`) is shared with `scripts/scan-report.mjs`, which
+  re-renders the report from a saved JSON envelope without re-scanning. Covered
+  by `test/html.test.ts`.
 - `--concurrency <n>` — run `n` authenticated connections in parallel, each its
   own NTLM handshake, one request per connection at a time so a request's
   handshake legs never interleave with another's. Defaults to `1` (unchanged

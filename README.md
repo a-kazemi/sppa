@@ -141,10 +141,18 @@ sppa scan-site --site https://sharepoint/sites/hr --format json > hr-audit.json
 ```
 
 `scan-site` walks the web, every visible list, and (unless `--skip-items`) list
-items with unique permissions. Add `--recurse` to walk subwebs too — every
+items with unique permissions. Add `--recurse` to walk sub-sites too — every
 finding is then tagged with the subweb it came from and the summary reports how
 many webs were scanned. Use `--max-items` to bound very large libraries and
 `--large-group-threshold` to tune the oversized-group flag.
+
+Unless `--format json` is used, `scan-site` also writes a standalone HTML report
+(inline CSS, no assets, prints cleanly to PDF) and prints a `Report:` link to it
+as the last line of the terminal output. The default path is
+`./sppa-scan-<host>-<timestamp>.html`; override it with `--report <path>` or turn
+it off with `--no-report`. To re-render a report from a saved
+`--format json` file without re-scanning, pipe it through
+[`scripts/scan-report.mjs`](scripts/scan-report.mjs).
 
 NTLM authenticates one TCP connection, so by default every request is serial.
 On a large site collection, `--concurrency 4` (say) opens four authenticated
