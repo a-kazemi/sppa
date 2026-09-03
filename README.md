@@ -120,6 +120,9 @@ admin). It also has both an **ALLOW** trace (`explain-access.txt`) and a **DENY*
 trace scoped to a single list (`explain-access-deny.txt`). A test regenerates it
 from the fixtures on every run, so it never drifts from the code.
 
+For a line-by-line walk through that sample output — the ALLOW trace, the DENY
+trace, and `scan-site` — see [docs/GUIDE-explain-access.md](docs/GUIDE-explain-access.md).
+
 ## JSON output
 
 Both commands accept `--format json` and emit a stable envelope
