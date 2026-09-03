@@ -26,6 +26,8 @@ import { renderJson, toJsonEnvelope } from '../src/report/json';
 
 const SITE = 'https://sp.contoso.local/sites/hr';
 const JANE = 'i:0#.w|contoso\\jane';
+const RLEE = 'i:0#.w|contoso\\rlee';
+const DENY_LIST = 'Salaries';
 const SAMPLE_DIR = path.resolve(__dirname, '../../sample');
 const API_DIR = path.join(SAMPLE_DIR, 'api');
 const UPDATE = Boolean(process.env['UPDATE_SAMPLES']);
@@ -38,6 +40,9 @@ function fixtureFor(url: string): string {
 
   const listItemRa = rawPath.match(/^web\/lists\/getByTitle\('(.+)'\)\/items\((\d+)\)\/roleassignments$/);
   if (listItemRa) return `list_${listItemRa[1]}_item_${listItemRa[2]}_roleassignments.json`;
+
+  const listEffPerms = rawPath.match(/^web\/lists\/getByTitle\('(.+)'\)\/getUserEffectivePermissions/);
+  if (listEffPerms) return `list_${listEffPerms[1]}_getUserEffectivePermissions.json`;
 
   const listItems = rawPath.match(/^web\/lists\/getByTitle\('(.+)'\)\/items$/);
   if (listItems) return `list_${listItems[1]}_items.json`;
@@ -143,6 +148,50 @@ async function runExplain(): Promise<string> {
   return renderJson(toJsonEnvelope('explain-access', SITE, result));
 }
 
+/**
+ * Mirror of commands/explainAccess.ts orchestration for a `--list` scope that
+ * resolves to a DENY: contractor "Rachel Lee" is a site user but is on none of
+ * the `Salaries` list ACL entries, so her effective permissions on that list
+ * come back empty.
+ */
+async function runExplainDeny(): Promise<string> {
+  const sp = client();
+  const web = await sp.connect();
+  const user = await sp.findUser(RLEE);
+  assert.ok(user, 'fixture user should resolve');
+  const [effectiveMask, userGroupIds, webAssignments] = await Promise.all([
+    sp.getListUserEffectivePermissions(DENY_LIST, user!.loginName),
+    sp.getUserGroupIds(user!.id),
+    sp.getWebRoleAssignments(),
+  ]);
+  const lists = await sp.getLists(true);
+  const meta = lists.find((l) => l.title.toLowerCase() === DENY_LIST.toLowerCase());
+  const listAssignments = await sp.getListRoleAssignments(DENY_LIST);
+  const scopePath: ScopeNode[] = [
+    {
+      kind: 'web',
+      title: web.title || web.url,
+      url: web.url,
+      hasUniqueRoleAssignments: web.hasUniqueRoleAssignments,
+      assignments: webAssignments,
+    },
+    {
+      kind: 'list',
+      title: DENY_LIST,
+      hasUniqueRoleAssignments: meta?.hasUniqueRoleAssignments ?? true,
+      assignments: listAssignments,
+    },
+  ];
+  const result = buildAccessTrace({
+    user: user!,
+    effectiveMask,
+    userGroupIds,
+    path: scopePath,
+    isSiteCollectionAdmin: user!.isSiteAdmin,
+  });
+  return renderJson(toJsonEnvelope('explain-access', SITE, result));
+}
+
 function normalise(json: string): string {
   const obj = JSON.parse(json) as { generatedAt?: string };
   obj.generatedAt = '1970-01-01T00:00:00.000Z';
@@ -206,11 +255,34 @@ test('explain-access: synthetic farm explains Jane Doe access', async () => {
   assert.equal(out.user.type, 'User');
 });
 
+test('explain-access --list: contractor is denied on the Salaries list', async () => {
+  const out = JSON.parse(await runExplainDeny()).result;
+  assert.equal(out.hasAccess, false);
+  assert.equal(out.fullControl, false);
+  assert.deepEqual(out.effectivePermissions, []);
+  assert.equal(out.siteCollectionAdmin, false);
+  assert.equal(out.user.title, 'Rachel Lee');
+  // Governing scope is the list, which breaks inheritance.
+  assert.deepEqual(out.brokenInheritanceAt, [
+    { kind: 'web', title: 'Human Resources' },
+    { kind: 'list', title: 'Salaries' },
+  ]);
+  // No SharePoint-group or direct grant reaches her on the list ACL.
+  assert.ok(!out.grantPaths.some((g: any) => g.channel === 'sharepoint-group' || g.channel === 'direct'));
+  // The one AD group on the list ACL is surfaced but the empty mask is authoritative.
+  assert.equal(out.unresolvedGroups.length, 1);
+  assert.equal(out.unresolvedGroups[0].name, 'CONTOSO\\Payroll');
+  assert.ok(out.notes.some((n: string) => n.includes('no access to this scope')));
+});
+
 test('committed sample/ worked example is up to date', async () => {
   const scanJson = await runScan();
   const explainJson = await runExplain();
+  const explainDenyJson = await runExplainDeny();
   checkSample('scan-site.json', scanJson);
   checkSample('explain-access.json', explainJson);
+  checkSample('explain-access-deny.json', explainDenyJson);
   checkSample('scan-site.txt', renderScanReport(JSON.parse(scanJson).result));
   checkSample('explain-access.txt', renderAccessTrace(JSON.parse(explainJson).result, SITE));
+  checkSample('explain-access-deny.txt', renderAccessTrace(JSON.parse(explainDenyJson).result, SITE));
 });

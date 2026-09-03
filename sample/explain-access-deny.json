@@ -1,0 +1,55 @@
+{
+  "tool": "sp-permission-analyzer",
+  "schemaVersion": 1,
+  "command": "explain-access",
+  "generatedAt": "1970-01-01T00:00:00.000Z",
+  "site": "https://sp.contoso.local/sites/hr",
+  "result": {
+    "user": {
+      "id": 21,
+      "loginName": "i:0#.w|contoso\\rlee",
+      "title": "Rachel Lee",
+      "type": "User"
+    },
+    "hasAccess": false,
+    "fullControl": false,
+    "effectivePermissions": [],
+    "siteCollectionAdmin": false,
+    "brokenInheritanceAt": [
+      {
+        "kind": "web",
+        "title": "Human Resources"
+      },
+      {
+        "kind": "list",
+        "title": "Salaries"
+      }
+    ],
+    "grantPaths": [
+      {
+        "channel": "ad-group-unresolved",
+        "scopeTitle": "Salaries",
+        "scopeKind": "list",
+        "via": "CONTOSO\\Payroll",
+        "roles": [
+          "Contribute"
+        ],
+        "certain": false,
+        "note": "AD security group — REST cannot expand its membership. The effective-permission result already accounts for it."
+      }
+    ],
+    "unresolvedGroups": [
+      {
+        "name": "CONTOSO\\Payroll",
+        "scopeTitle": "Salaries",
+        "roles": [
+          "Contribute"
+        ]
+      }
+    ],
+    "notes": [
+      "Effective permissions are empty — the user has no access to this scope.",
+      "1 AD security group(s) on this scope could not be expanded via REST. The effective-permission check above is still authoritative."
+    ]
+  }
+}

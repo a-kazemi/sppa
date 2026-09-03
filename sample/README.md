@@ -19,8 +19,10 @@ the tool looks for:
 | List `Salaries` | Inheritance broken at the list |
 | `Salaries/2024 Executive Compensation.xlsx` | Inheritance broken at the item; a direct grant to Jane Doe |
 | `S-1-5-21-…-2571` | Orphaned principal — display name collapsed to a raw SID, still on the `Salaries` ACL |
+| `CONTOSO\Payroll` (AD security group) on the `Salaries` ACL | Membership can't be expanded over REST — surfaced but marked uncertain |
 | SharePoint group `All HR Staff` | 112 members — oversized group |
 | `Mark Adams` | Site collection administrator |
+| `Rachel Lee` (`contoso\rlee`) | Contractor — a site user, but on none of the `Salaries` ACL entries; used for the DENY example below |
 | Lists `Documents`, `Onboarding` | Healthy — inherit permissions, no unique items |
 | List `Workflow History` | Hidden — excluded from the scan by default |
 
@@ -30,10 +32,21 @@ the tool looks for:
 |---|---|
 | `api/*.json` | The recorded SharePoint `_api` (REST) response bodies for the farm above — the tool's raw input |
 | `scan-site.json` / `scan-site.txt` | `spperm scan-site --site https://sp.contoso.local/sites/hr` output, JSON and table |
-| `explain-access.json` / `explain-access.txt` | `spperm explain-access --site https://sp.contoso.local/sites/hr --user 'i:0#.w\|contoso\jane'` output |
+| `explain-access.json` / `explain-access.txt` | `spperm explain-access --site https://sp.contoso.local/sites/hr --user 'i:0#.w\|contoso\jane'` output — an **ALLOW** trace at the web scope |
+| `explain-access-deny.json` / `explain-access-deny.txt` | `spperm explain-access --site https://sp.contoso.local/sites/hr --user 'i:0#.w\|contoso\rlee' --list Salaries` output — a **DENY** trace at a list scope |
 
 `generatedAt` in the committed JSON is zeroed to `1970-01-01T00:00:00.000Z`; the
 real CLI stamps the current time.
+
+### Reading the DENY example
+
+`Verdict: NO ACCESS` comes straight from `getUserEffectivePermissions` on the
+list, which returns an empty mask for Rachel Lee. The trace still lists the
+`CONTOSO\Payroll` AD security group that sits on the `Salaries` ACL and marks it
+`?` — REST cannot expand its membership, so the tool cannot *prove* she is absent
+from it. The empty effective-permission mask is authoritative regardless: if she
+were a member of `CONTOSO\Payroll`, the mask would not have come back empty. This
+is the tool being explicit about what it can and cannot verify.
 
 ## How it is kept honest
 

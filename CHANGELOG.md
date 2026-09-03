@@ -22,6 +22,11 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   parse → analyse → render pipeline against it (no live farm, no production code
   change) and fails if the committed output drifts. Regression harness for the
   pre-mortem's `_api`-shape risk (F4); the NTLM handshake still needs a real farm.
+- `sample/explain-access-deny.{json,txt}` — a second `explain-access` worked
+  example scoped to a single list (`--list Salaries`) that resolves to
+  `NO ACCESS`, showing how a DENY verdict renders and how an unexpandable AD
+  security group on the ACL is still surfaced (marked uncertain) while the empty
+  effective-permission mask stays authoritative. Pinned by `test/sample.test.ts`.
 
 ## [0.1.0] — 2026-09-03
 

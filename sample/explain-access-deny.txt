@@ -1,0 +1,21 @@
+SharePoint access explanation
+Site: https://sp.contoso.local/sites/hr
+User: Rachel Lee (User, id 21)
+Login: i:0#.w|contoso\rlee
+
+Verdict: NO ACCESS
+
+Inheritance is broken at:
+  • web: Human Resources
+  • list: Salaries
+
+How access is granted:
+  ? AD security group "CONTOSO\Payroll" (membership not verifiable via REST) — Contribute @ list "Salaries"
+      AD security group — REST cannot expand its membership. The effective-permission result already accounts for it.
+
+AD security groups on the ACL (not expanded):
+  • CONTOSO\Payroll — Contribute @ Salaries
+
+Notes:
+  • Effective permissions are empty — the user has no access to this scope.
+  • 1 AD security group(s) on this scope could not be expanded via REST. The effective-permission check above is still authoritative.

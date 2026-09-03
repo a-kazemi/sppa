@@ -116,8 +116,9 @@ synthetic SharePoint Server 2019 site collection — recorded `_api` responses p
 the exact `scan-site` and `explain-access` output the tool produces from them,
 showing every finding (broken inheritance at web/list/item, an orphaned SID, an
 `Everyone` grant, an unexpandable AD group, an oversized group, a site collection
-admin). A test regenerates it from the fixtures on every run, so it never drifts
-from the code.
+admin). It also has both an **ALLOW** trace (`explain-access.txt`) and a **DENY**
+trace scoped to a single list (`explain-access-deny.txt`). A test regenerates it
+from the fixtures on every run, so it never drifts from the code.
 
 ## JSON output
 

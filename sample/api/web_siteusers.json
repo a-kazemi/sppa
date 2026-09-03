@@ -31,6 +31,14 @@
       "Email": "",
       "PrincipalType": 4,
       "IsSiteAdmin": false
+    },
+    {
+      "Id": 21,
+      "LoginName": "i:0#.w|contoso\\rlee",
+      "Title": "Rachel Lee",
+      "Email": "rachel.lee@contractors.contoso.local",
+      "PrincipalType": 1,
+      "IsSiteAdmin": false
     }
   ]
 }
