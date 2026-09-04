@@ -8,6 +8,16 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- [`docs/ROADMAP.md`](docs/ROADMAP.md) — a prioritised backlog of everything
+  that has been asked for, from adoption blockers (certificate trust, integrated
+  Windows auth, a single-file binary) through CSV/NDJSON output, snapshot
+  diffing and a CI `--fail-on` mode, to long-term ideas. Documentation only; no
+  behaviour change, and nothing on it is a commitment.
+
+## [0.2.0] — 2026-09-03
+
+### Added
+
 - `scan-site` writes a standalone HTML report by default — inline CSS, no runtime
   assets, RTL-aware, prints cleanly to PDF — and appends a `Report:` `file://`
   link as the last line of the terminal output. Path defaults to
@@ -40,6 +50,10 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- Published on npm as **`@a-kazemi/sppa`** — the unscoped name `sppa` is blocked
+  by the registry's similarity filter. The command itself is unchanged: the
+  package still installs a `sppa` binary, so only the install line differs
+  (`npm install -g @a-kazemi/sppa`, `npx @a-kazemi/sppa ...`).
 - `explain-access --list` / `list-access --list` now resolve the list with one
   targeted `getByTitle` request instead of enumerating every list on the site,
   and fall back to a case-insensitive match (then use the canonical title) when

@@ -20,7 +20,7 @@ line. Built for SharePoint Server 2016, 2019 and Subscription Edition farms.
 **Read-only. No data leaves your machine. No telemetry. No account required.**
 The tool only issues `GET` requests to the SharePoint REST API (`_api`).
 
-> Status: `v0.1.1`, early release. It does one job on classic NTLM farms. If it
+> Status: `v0.2.0`, early release. It does one job on classic NTLM farms. If it
 > is useful — or if it breaks in your environment — please
 > [open an issue](https://github.com/a-kazemi/sppa/issues).
 
@@ -28,26 +28,31 @@ The tool only issues `GET` requests to the SharePoint REST API (`_api`).
 
 ## Install
 
-Requires **Node.js 18 or newer**. Not on npm yet — install from source:
+Requires **Node.js 18 or newer**.
+
+```bash
+npm install -g @a-kazemi/sppa
+sppa --help
+```
+
+Or run it without installing:
+
+```bash
+npx @a-kazemi/sppa scan-site --site https://sharepoint/sites/hr
+```
+
+From source (for development):
 
 ```bash
 git clone https://github.com/a-kazemi/sppa.git
 cd sppa
 npm install && npm run build
 npm link            # puts `sppa` on your PATH
-
-sppa --help
-```
-
-Or install straight from GitHub:
-
-```bash
-npm install -g github:a-kazemi/sppa
 ```
 
 ## Authentication
 
-The `v0.1.x` line supports **NTLM with explicit credentials only** (see [docs/AUTH.md](docs/AUTH.md);
+The `v0.2.x` line supports **NTLM with explicit credentials only** (see [docs/AUTH.md](docs/AUTH.md);
 auth failures are catalogued in [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)).
 Provide the auditing account through environment variables — never on the command
 line, where it would show up in the process list:
@@ -200,6 +205,10 @@ Both commands accept `--format json` and emit a stable envelope
 - No writes, ever. It will not fix anything it finds.
 - No multi-farm, scheduled snapshots, or drift diffing.
 
+Where those gaps sit in the queue — and everything else that has been asked for —
+is written down in [docs/ROADMAP.md](docs/ROADMAP.md). Listing something there is
+not a commitment to build it; open an issue to make the case for what you need.
+
 ## Exit codes
 
 | Code | Meaning |
@@ -251,7 +260,7 @@ the [MS-NLMP] test vectors — no live farm needed to hack on them.
 against the synthetic farm in [`sample/`](sample/) and fails if the committed
 output there goes stale.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for what is in and out of scope — `v0.1.x`
+See [CONTRIBUTING.md](CONTRIBUTING.md) for what is in and out of scope — `v0.2.x`
 is feature-frozen; bug fixes, docs, tests, and auth reports are what move it
 forward.
 

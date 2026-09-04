@@ -225,7 +225,7 @@ diff between runs or feed into a report.
 
 ## Honest limits
 
-The `v0.1.x` line does one job on classic NTLM farms. What it does not do:
+The `v0.2.x` line does one job on classic NTLM farms. What it does not do:
 
 - **NTLM with an explicit account only.** No AD FS / WS-Federation, no Forms-Based
   Auth, no Kerberos-only endpoints. Auth setup is in

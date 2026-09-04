@@ -51,7 +51,7 @@ SharePoint answered `401` but the `WWW-Authenticate` header did **not** contain
 | `<scheme>` | Cause | Fix |
 |------------|-------|-----|
 | `Negotiate` only | The web application is **Kerberos-only**, or it is **AD FS / WS-Federation** (the `Negotiate` is the redirect to an STS). | Enable NTLM as a fallback provider on the web application (`Windows Authentication → Providers → add NTLM`), point the tool at an NTLM-enabled zone/extension of the same web application, or open an issue for AD FS support. |
-| `Basic` only | Basic auth over (hopefully) TLS; NTLM is disabled. | Enable the NTLM provider, or use an NTLM zone. Basic-only is not supported in v0.1.x. |
+| `Basic` only | Basic auth over (hopefully) TLS; NTLM is disabled. | Enable the NTLM provider, or use an NTLM zone. Basic-only is not supported in v0.2.x. |
 | `Negotiate, NTLM` but you still see this | You are hitting a proxy/WAF that strips the `NTLM` token from the header. | See **Proxy interference** below. |
 
 ### `error: Server did not return an NTLM Type 2 challenge.`
@@ -91,7 +91,7 @@ The request returned `200`, but the body was HTML, not JSON.
 
 | Cause | Fix |
 |-------|-----|
-| The connection was silently redirected to a **sign-in page** (AD FS / FBA / a portal). NTLM "succeeded" against the proxy, not SharePoint. | Fix auth so `/_api/web` returns JSON in a browser with the same account. If the farm is federated, this tool cannot audit it in v0.1.x. |
+| The connection was silently redirected to a **sign-in page** (AD FS / FBA / a portal). NTLM "succeeded" against the proxy, not SharePoint. | Fix auth so `/_api/web` returns JSON in a browser with the same account. If the farm is federated, this tool cannot audit it in v0.2.x. |
 | `--site` points at a **path that is not a SharePoint web** (e.g. a vanity URL handled by IIS directly, or `/_layouts/`). | Use the site collection or sub-web root, e.g. `https://sp/sites/hr`. |
 | A **proxy error page** (502/504 rendered as HTML with a 200 by the proxy). | See **Proxy interference** below. |
 
@@ -180,7 +180,7 @@ Internal farms usually use a private CA or a self-signed certificate.
 
 ### Proxy interference
 
-`sppa` v0.1.x does **not** read `HTTP_PROXY` / `HTTPS_PROXY` and always
+`sppa` v0.2.x does **not** read `HTTP_PROXY` / `HTTPS_PROXY` and always
 connects directly. A corporate proxy in the path shows up as one of:
 
 - `Network error (ECONNREFUSED / ETIMEDOUT)` — direct route is blocked, proxy required.

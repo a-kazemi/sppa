@@ -1,6 +1,6 @@
 {
-  "name": "sppa",
-  "version": "0.1.1",
+  "name": "@a-kazemi/sppa",
+  "version": "0.2.0",
   "description": "Explain and audit SharePoint Server on-premises permissions from the command line. Read-only, no data egress, no telemetry.",
   "bin": {
     "sppa": "dist/src/index.js"
@@ -12,6 +12,7 @@
   },
   "files": [
     "dist/src",
+    "scripts/scan-report.mjs",
     "README.md",
     "LICENSE",
     "CHANGELOG.md",
@@ -42,9 +43,12 @@
   ],
   "author": "Amir Kazemi",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/a-kazemi/sppa.git"
+    "url": "git+https://github.com/a-kazemi/sppa.git"
   },
   "bugs": {
     "url": "https://github.com/a-kazemi/sppa/issues"

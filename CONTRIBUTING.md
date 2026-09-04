@@ -17,11 +17,14 @@ what it does is "one job, done well, on classic NTLM farms."
 
 ## What will be declined right now
 
-`v0.1.x` is **feature-frozen**. The following are out of scope until there is
-named, post-launch demand for them — please open an issue to make the case
-rather than sending a PR:
+The current line is **feature-frozen**. The following are out of scope until
+there is named, post-launch demand for them — please open an issue to make the
+case rather than sending a PR. Most of them are queued and prioritised in
+[`docs/ROADMAP.md`](docs/ROADMAP.md), which is where a request lands once the
+case has been made; being listed there is still not an invitation to send the
+patch unprompted:
 
-- New flags, commands, or output formats (HTML report, `--replay`, etc.).
+- New flags, commands, or output formats (`--replay`, CSV, `diff`, etc.).
 - New auth modes — Kerberos-only, AD FS / WS-Federation, Forms-Based Auth.
 - AD security-group expansion (SharePoint REST does not expose membership;
   the verdict already relies on `getUserEffectivePermissions`, which resolves

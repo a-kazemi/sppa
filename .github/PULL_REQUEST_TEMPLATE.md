@@ -1,5 +1,5 @@
 <!--
-v0.1.x is feature-frozen (see CONTRIBUTING.md). Bug fixes, docs, tests, and
+v0.2.x is feature-frozen (see CONTRIBUTING.md). Bug fixes, docs, tests, and
 CI changes are welcome. New flags/commands/output formats and new auth modes
 will be declined until there is named post-launch demand — please open an
 issue first so the change is not wasted work.

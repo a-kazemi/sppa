@@ -1,6 +1,6 @@
 # Authentication
 
-## What v0.1.x supports
+## What v0.2.x supports
 
 **NTLM with explicit credentials, over HTTP or HTTPS.** That is the whole
 surface. The handshake is implemented in `src/auth/` and does not depend on any
