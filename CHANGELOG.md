@@ -6,6 +6,8 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.2.1] — 2026-09-04
+
 ### Added
 
 - [`docs/ROADMAP.md`](docs/ROADMAP.md) — a prioritised backlog of everything

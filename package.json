@@ -1,6 +1,6 @@
 {
   "name": "@a-kazemi/sppa",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Explain and audit SharePoint Server on-premises permissions from the command line. Read-only, no data egress, no telemetry.",
   "bin": {
     "sppa": "dist/src/index.js"

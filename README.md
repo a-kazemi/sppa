@@ -20,7 +20,7 @@ line. Built for SharePoint Server 2016, 2019 and Subscription Edition farms.
 **Read-only. No data leaves your machine. No telemetry. No account required.**
 The tool only issues `GET` requests to the SharePoint REST API (`_api`).
 
-> Status: `v0.2.0`, early release. It does one job on classic NTLM farms. If it
+> Status: `v0.2.1`, early release. It does one job on classic NTLM farms. If it
 > is useful — or if it breaks in your environment — please
 > [open an issue](https://github.com/a-kazemi/sppa/issues).
 
