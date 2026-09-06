@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SharePoint permission scan — Contoso Intranet Portal</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --card: #fff; --ink: #1a1c1f; --muted: #666; --line: #e3e5e8;
+    --warn-bg: #fff4e5; --warn-ink: #8a5200; --alert: #c23b3b; --chip-bg: #eef1f4;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16181c; --card: #1e2126; --ink: #e6e8ea; --muted: #9aa0a6; --line: #2c2f36;
+      --warn-bg: #3a2e1a; --warn-ink: #ffcf8a; --alert: #ff6b6b; --chip-bg: #2a2e35;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 32px; background: var(--bg); color: var(--ink);
+    font: 14px/1.6 "Segoe UI", Tahoma, system-ui, sans-serif; }
+  .report { max-width: 1100px; margin: 0 auto; }
+  header { margin-bottom: 24px; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .sub { color: var(--muted); font-size: 13px; }
+  .sub a { color: inherit; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px; margin: 20px 0 8px; }
+  .tile { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+  .tile.alert { border-color: var(--alert); }
+  .tile-value { font-size: 24px; font-weight: 700; }
+  .tile.alert .tile-value { color: var(--alert); }
+  .tile-label { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  section { background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+    padding: 4px 20px 16px; margin-top: 20px; }
+  h2 { font-size: 15px; margin: 16px 0 12px; display: flex; align-items: center; gap: 8px; }
+  .count { background: var(--chip-bg); color: var(--muted); border-radius: 999px;
+    padding: 1px 9px; font-size: 12px; font-weight: 600; }
+  .empty { color: var(--muted); font-style: italic; margin: 4px 0 8px; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; white-space: nowrap; }
+  td.num, td.name { white-space: nowrap; }
+  td.num { font-variant-numeric: tabular-nums; }
+  .mono, .name a { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 12px; }
+  .badge { border-radius: 6px; padding: 1px 8px; font-size: 11px; font-weight: 700; }
+  .badge-web { background: #e5efff; color: #1c4fb0; }
+  .badge-list { background: #e9f7e9; color: #1f7a34; }
+  .badge-item { background: #f3e9ff; color: #6b30b0; }
+  @media (prefers-color-scheme: dark) {
+    .badge-web { background: #1c3a66; color: #cfe0ff; }
+    .badge-list { background: #1e4a2b; color: #cdefd4; }
+    .badge-item { background: #3d2860; color: #e6d4ff; }
+  }
+  .chip { display: inline-block; background: var(--chip-bg); border-radius: 6px;
+    padding: 1px 7px; margin: 1px 0; font-size: 12px; white-space: nowrap; }
+  .chip-warn { background: var(--warn-bg); color: var(--warn-ink); font-weight: 600; }
+  footer { color: var(--muted); font-size: 12px; margin-top: 24px; text-align: center; }
+  @media print {
+    body { padding: 0; background: #fff; }
+    section, .tile { border-color: #ccc; break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="report">
+  <header>
+    <h1>SharePoint permission scan</h1>
+    <div class="sub">
+      Contoso Intranet Portal &nbsp;·&nbsp; <a href="https://portal.contoso.com/">https://portal.contoso.com</a><br>
+      1 web(s) scanned &nbsp;·&nbsp; generated 2026-09-06 15:34:33 UTC
+      &nbsp;·&nbsp; sppa v0.2.1 &nbsp;·&nbsp; schema v1
+    </div>
+  </header>
+
+  <div class="grid"><div class="tile"><div class="tile-value">1</div><div class="tile-label">Webs scanned</div></div><div class="tile"><div class="tile-value">23</div><div class="tile-label">Lists scanned</div></div><div class="tile"><div class="tile-value">3</div><div class="tile-label">Lists w/ unique perms</div></div><div class="tile"><div class="tile-value">5</div><div class="tile-label">Items w/ unique perms</div></div><div class="tile"><div class="tile-value">0</div><div class="tile-label">Orphaned principals</div></div><div class="tile"><div class="tile-value">0</div><div class="tile-label">Broad-audience grants</div></div><div class="tile"><div class="tile-value">0</div><div class="tile-label">Oversized groups</div></div><div class="tile"><div class="tile-value">6</div><div class="tile-label">Site collection admins</div></div></div>
+
+  <section><h2>Broken inheritance <span class="count">9</span></h2><div class="table-wrap"><table>
+          <thead><tr><th>Kind</th><th>Web</th><th>Scope</th><th>Assignments</th><th>Principals</th></tr></thead>
+          <tbody><tr>
+        <td><span class="badge badge-web">Web</span></td>
+        <td></td>
+        <td class="name">Contoso Intranet Portal <a href="https://portal.contoso.com/">https://portal.contoso.com</a></td>
+        <td class="num">16</td>
+        <td><span class="chip">spfarmadmin</span> <span class="chip">Team Site Owners</span> <span class="chip">Team Site Visitors</span> <span class="chip">Team Site Members</span> <span class="chip">Megan Bowen</span> <span class="chip">Style Resource Readers</span> <span class="chip">Designers</span> <span class="chip">Hierarchy Managers</span> <span class="chip">Approvers</span> <span class="chip">Restricted Readers</span> <span class="chip">Translation Managers</span> <span class="chip">Portal-Admin</span> <span class="chip">Alex Wilber</span> <span class="chip">Limited Access System Group</span> <span class="chip">CONTOSO-DC\domain users</span> <span class="chip">Digital Workplace</span></td>
+      </tr><tr>
+        <td><span class="badge badge-item">Item</span></td>
+        <td></td>
+        <td class="name">/Assets/IMG/Nav/ManagementPanel.svg</td>
+        <td class="num">13</td>
+        <td><span class="chip">spfarmadmin</span> <span class="chip">Team Site Owners</span> <span class="chip">Team Site Visitors</span> <span class="chip">Team Site Members</span> <span class="chip">Designers</span> <span class="chip">Hierarchy Managers</span> <span class="chip">Approvers</span> <span class="chip">Restricted Readers</span> <span class="chip">Translation Managers</span> <span class="chip">Portal-Admin</span> <span class="chip">CONTOSO-DC\domain users</span> <span class="chip">Digital Workplace</span> <span class="chip">SharingLinks.d1a1e825-d1e8-4d3f-962d-92d9a3aada92.OrganizationEdit.48e403f5-74e6-4e39-bfe9-8626908e356b</span></td>
+      </tr><tr>
+        <td><span class="badge badge-list">List</span></td>
+        <td></td>
+        <td class="name">Audits</td>
+        <td class="num">5</td>
+        <td><span class="chip">spfarmadmin</span> <span class="chip">Megan Bowen</span> <span class="chip">Style Resource Readers</span> <span class="chip">Limited Access System Group</span> <span class="chip">Digital Workplace</span></td>
+      </tr><tr>
+        <td><span class="badge badge-list">List</span></td>
+        <td></td>
+        <td class="name">Site Collection Images</td>
+        <td class="num">9</td>
+        <td><span class="chip">spfarmadmin</span> <span class="chip">Team Site Owners</span> <span class="chip">Team Site Visitors</span> <span class="chip">Team Site Members</span> <span class="chip">Style Resource Readers</span> <span class="chip">Designers</span> <span class="chip">Hierarchy Managers</span> <span class="chip">Approvers</span> <span class="chip">Restricted Readers</span></td>
+      </tr><tr>
+        <td><span class="badge badge-item">Item</span></td>
+        <td></td>
+        <td class="name">/SiteAssets/welcome-video.mp4</td>
+        <td class="num">11</td>
+        <td><span class="chip">spfarmadmin</span> <span class="chip">Team Site Owners</span> <span class="chip">Team Site Visitors</span> <span class="chip">Team Site Members</span> <span class="chip">Designers</span> <span class="chip">Hierarchy Managers</span> <span class="chip">Approvers</span> <span class="chip">Restricted Readers</span> <span class="chip">Translation Managers</span> <span class="chip">Portal-Admin</span> <span class="chip">SharingLinks.2693028d-9ea2-4b3f-b2f1-ac56596d61fe.OrganizationEdit.311946d8-8224-43ff-98d6-6d51455c3ab1</span></td>
+      </tr><tr>
+        <td><span class="badge badge-item">Item</span></td>
+        <td></td>
+        <td class="name">/Pages/AdminHome.aspx</td>
+        <td class="num">4</td>
+        <td><span class="chip">spfarmadmin</span> <span class="chip">Team Site Owners</span> <span class="chip">Portal-Admin</span> <span class="chip">Digital Workplace</span></td>
+      </tr><tr>
+        <td><span class="badge badge-item">Item</span></td>
+        <td></td>
+        <td class="name">/Pages/annual-hr-report-2022.aspx</td>
+        <td class="num">11</td>
+        <td><span class="chip">spfarmadmin</span> <span class="chip">Team Site Owners</span> <span class="chip">Team Site Visitors</span> <span class="chip">Team Site Members</span> <span class="chip">Designers</span> <span class="chip">Hierarchy Managers</span> <span class="chip">Approvers</span> <span class="chip">Restricted Readers</span> <span class="chip">Translation Managers</span> <span class="chip">Portal-Admin</span> <span class="chip">SharingLinks.8c7ffbbc-eae4-4cb4-b09b-86a597216786.OrganizationView.6f5aedb6-53ce-4c48-88dd-ff489f2b5f0b</span></td>
+      </tr><tr>
+        <td><span class="badge badge-item">Item</span></td>
+        <td></td>
+        <td class="name">/SitePages/testWFS.aspx</td>
+        <td class="num">11</td>
+        <td><span class="chip">spfarmadmin</span> <span class="chip">Team Site Owners</span> <span class="chip">Team Site Visitors</span> <span class="chip">Team Site Members</span> <span class="chip">Designers</span> <span class="chip">Hierarchy Managers</span> <span class="chip">Approvers</span> <span class="chip">Restricted Readers</span> <span class="chip">Translation Managers</span> <span class="chip">Portal-Admin</span> <span class="chip">Alex Wilber</span></td>
+      </tr><tr>
+        <td><span class="badge badge-list">List</span></td>
+        <td></td>
+        <td class="name">Style Library</td>
+        <td class="num">9</td>
+        <td><span class="chip">spfarmadmin</span> <span class="chip">Team Site Owners</span> <span class="chip">Team Site Visitors</span> <span class="chip">Team Site Members</span> <span class="chip">Style Resource Readers</span> <span class="chip">Designers</span> <span class="chip">Hierarchy Managers</span> <span class="chip">Approvers</span> <span class="chip">Restricted Readers</span></td>
+      </tr></tbody>
+        </table></div></section>
+  <section><h2>Broad-audience grants <span class="count">0</span></h2><p class="empty">No "Everyone" / broad-audience grants.</p></section>
+  <section><h2>Orphaned principals <span class="count">0</span></h2><p class="empty">No orphaned SIDs on any ACL.</p></section>
+  <section><h2>Oversized SharePoint groups <span class="count">0</span></h2><p class="empty">No group exceeds the size threshold.</p></section>
+  <section><h2>Site collection administrators <span class="count">6</span></h2><div class="table-wrap"><table>
+          <thead><tr><th>Name</th><th>Login</th></tr></thead>
+          <tbody><tr><td class="name">Adele Vance</td><td class="mono">i:0#.w|contoso-dc\a.vance</td></tr><tr><td class="name">Megan Bowen</td><td class="mono">i:0#.w|contoso-dc\m.bowen</td></tr><tr><td class="name">Alex Wilber</td><td class="mono">i:0#.w|contoso-dc\a.wilber</td></tr><tr><td class="name">Diego Siciliani</td><td class="mono">i:0#.w|contoso-dc\d.siciliani</td></tr><tr><td class="name">spfarmadmin</td><td class="mono">i:0#.w|contoso-dc\spfarmadmin</td></tr><tr><td class="name">System Account</td><td class="mono">SHAREPOINT\system</td></tr></tbody>
+        </table></div></section>
+
+  <footer>Generated by sppa · read-only audit · no data left the machine it ran on</footer>
+</div>
+
+
+</body></html>
